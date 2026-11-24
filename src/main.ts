@@ -15,6 +15,7 @@ const detail = element('branch-detail');
 const observationLabel = element('observation-label');
 const observationDetail = element('observation-detail');
 const observationStory = element('observation-story');
+const mapSelection = element('map-selection');
 function formatProbability(probability: number) {
   const percent = probability * 100;
   return percent > 0 && percent < 0.05 ? '<0.1%' : `${percent.toFixed(1)}%`;
@@ -35,6 +36,7 @@ try {
 function selectBranch(index: number) {
   const branch = scenario.branches[index];
   space?.select(index);
+  mapSelection.textContent = `Inspecting: ${branch.title}`;
   for (const button of branchList.querySelectorAll('button')) {
     button.setAttribute('aria-pressed', String(Number(button.dataset.index) === index));
   }
@@ -99,8 +101,8 @@ function generate(input: string) {
   observe.disabled = false;
   scenario = generateScenario(input);
   prompt.value = scenario.prompt;
-  observationLabel.textContent = 'AWAITING OBSERVATION';
-  observationDetail.textContent = 'All eight futures are possible.';
+  observationLabel.textContent = 'READY TO OBSERVE';
+  observationDetail.textContent = 'Sample any of the eight futures by weight, then see what follows.';
   observationStory.hidden = true;
   observationStory.textContent = '';
   renderScenario();

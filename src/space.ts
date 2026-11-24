@@ -13,6 +13,10 @@ interface Path {
   materials: (THREE.LineBasicMaterial | THREE.SpriteMaterial | THREE.MeshBasicMaterial)[];
 }
 
+export function reserveOrbitWheel(event: WheelEvent) {
+  if (!event.shiftKey || event.ctrlKey || event.metaKey) event.stopImmediatePropagation();
+}
+
 export function createSpace(host: HTMLElement, onPick: (index: number) => void) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -21,6 +25,8 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
   camera.position.set(0, 7.2, 19);
   const controls = new OrbitControls(camera, renderer.domElement);
+  renderer.domElement.addEventListener('wheel', reserveOrbitWheel, { capture: true, passive: true });
+  renderer.domElement.style.touchAction = 'pan-y';
   const home = new THREE.Vector3(0, 1.9, 0);
   controls.target.copy(home);
   controls.enableDamping = true;
