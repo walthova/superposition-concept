@@ -128,6 +128,13 @@ const titles = [
   'The Patient Build', 'The Uneven Wave', 'The Long Arc', 'The New Equilibrium',
 ];
 
+const consequences = [
+  '',
+  'An independent review tests whether the changes can hold up under stress.',
+  'The people most affected organize a public process to challenge the next decision.',
+  'Another group tries to reproduce the results under different conditions.',
+];
+
 export interface Branch {
   index: number;
   bits: string;
@@ -182,21 +189,19 @@ export function generateScenario(
   const { amplitudes, probabilities, incoherent } = backend.run(circuit);
   const prior = lineage.at(-1);
   const depth = lineage.length;
-  const eventSeed = hash(`${normalized}:${lineage[0]}`);
-  const events = (depth + eventSeed - 1) % setting.continuations.length;
-  const groups = 3 * depth + eventSeed % 5;
-  const laterEvents: Events = [
-    [`${groups} participating groups vote to leave.`, `${groups} new groups join after running their own trials.`],
-    [`Organizers close ${groups + 2} sites to consolidate resources.`, `A new round of investment opens ${groups + 2} more sites.`],
-    [`${groups + 1} backers decline to renew their commitments.`, `${groups + 1} backers sign agreements to take on operating costs.`],
-  ];
-  const outcomes = depth === 0 ? setting.factors.map(factor => factor.outcomes) :
-    depth <= setting.continuations.length ? setting.continuations[events] : laterEvents;
+  const variants = setting.continuations.length;
+  const combinations = variants ** setting.factors.length;
+  const step = Math.max(0, depth - 1);
+  const beat = (step * (combinations - 2) + hash(`${normalized}:${lineage[0]}`)) % combinations;
+  const outcomes = setting.factors.map((factor, i) =>
+    depth === 0 ? factor.outcomes : setting.continuations[Math.floor(beat / variants ** i) % variants][i],
+  );
+  const consequence = consequences[Math.floor(step / combinations) % consequences.length];
   const branches = amplitudes.map((amplitude, index) => ({
     index,
     bits: index.toString(2).padStart(circuit.qubits, '0'),
     title: titles[index],
-    narrative: `${prior === undefined ? '' : `After ${titles[prior]}: `}${outcomes.map((pair, i) => pair[(index >> i) & 1]).join(' ')}`,
+    narrative: `${prior === undefined ? '' : `After ${titles[prior]}: `}${[...outcomes.map((pair, i) => pair[(index >> i) & 1]), consequence].filter(Boolean).join(' ')}`,
     amplitude,
     probability: probabilities[index],
     incoherent: incoherent[index],
