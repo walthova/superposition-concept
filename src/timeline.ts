@@ -1,4 +1,4 @@
-import { CubicBezierCurve3, Vector3 } from 'three';
+import { Box3, CubicBezierCurve3, MathUtils, Vector3 } from 'three';
 
 export function timelineCurve(fork: Vector3, index: number): CubicBezierCurve3 {
   const offset = (index - 3.5) / 3.5;
@@ -17,4 +17,17 @@ export function observePath<T extends { index: number; curve: CubicBezierCurve3 
   const path = frontier.find(candidate => candidate.index === index);
   if (!path) return;
   return { path, fork: path.curve.v3, fading: frontier.filter(candidate => candidate !== path) };
+}
+
+export function frameTimeline(curves: CubicBezierCurve3[]) {
+  const hull = curves.flatMap(({ v0, v1, v2, v3 }) => [v0, v1, v2, v3]);
+  const center = new Box3().setFromPoints(hull).getCenter(new Vector3());
+  const radius = Math.max(...hull.map(point => point.distanceTo(center)));
+  return { center, radius };
+}
+
+export function minimumOrbitDistance(radius: number, verticalFov: number, aspect: number) {
+  const vertical = MathUtils.degToRad(verticalFov) / 2;
+  const horizontal = Math.atan(Math.tan(vertical) * aspect);
+  return radius * 1.12 / Math.sin(Math.min(vertical, horizontal));
 }

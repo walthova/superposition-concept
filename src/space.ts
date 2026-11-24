@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Branch } from './scenario';
-import { observePath, timelineCurve } from './timeline';
+import { frameTimeline, minimumOrbitDistance, observePath, timelineCurve } from './timeline';
 
 export const colors = ['#8c9bff', '#a388ff', '#c28bff', '#ed9df1', '#fbadcc', '#ffbfaf', '#7ae9e6', '#7cbaff'];
 
@@ -116,10 +116,13 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
   let selected = 0;
   let started = 0;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const framing = home.clone();
-  const targetFrame = home.clone();
-  let extraDistance = 0;
-  let targetDistance = 0;
+  const frameStart = home.clone();
+  let activeFrame = { center: home.clone(), radius: 0 };
+
+  function fitOrbit() {
+    controls.minDistance = Math.max(8, minimumOrbitDistance(activeFrame.radius, camera.fov, camera.aspect));
+    controls.maxDistance = Math.max(68, controls.minDistance * 1.5);
+  }
 
   function setBranches(branches: Branch[], observation?: number) {
     fadingPaths.forEach(dispose);
@@ -132,14 +135,10 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
       }
       trail.push(result.path);
       fadingPaths = result.fading;
-      targetFrame.set(result.fork.x * 0.4, home.y, result.fork.z + Math.min(12, (root.z - result.fork.z) * 0.42));
-      targetDistance = Math.min(28, (root.z - result.fork.z) * 0.46);
     } else {
       paths.forEach(dispose);
       fadingPaths = [];
       trail.splice(0).forEach(dispose);
-      targetFrame.copy(home);
-      targetDistance = 0;
     }
     started = performance.now();
     paths = branches.map(({ index, probability }) => {
@@ -148,6 +147,9 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
       network.add(path.group);
       return path;
     });
+    frameStart.copy(controls.target);
+    activeFrame = frameTimeline(paths.map(path => path.curve));
+    fitOrbit();
   }
 
   new ResizeObserver(() => {
@@ -156,6 +158,7 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     camera.aspect = clientWidth / clientHeight;
     camera.fov = camera.aspect < 1.3 ? Math.min(68, 42 * 1.3 / camera.aspect) : 42;
     camera.updateProjectionMatrix();
+    fitOrbit();
     renderer.setSize(clientWidth, clientHeight);
   }).observe(host);
 
@@ -174,20 +177,13 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
   });
 
   const offset = new THREE.Vector3();
-  const sightline = new THREE.Vector3();
   renderer.setAnimationLoop(now => {
-    const ease = reduced ? 1 : 0.055;
-    offset.subVectors(targetFrame, framing).multiplyScalar(ease);
-    framing.add(offset);
+    const elapsed = reduced ? 1600 : now - started;
+    const ease = THREE.MathUtils.smoothstep(elapsed, 0, 470);
+    offset.lerpVectors(frameStart, activeFrame.center, ease).sub(controls.target);
     controls.target.add(offset);
     camera.position.add(offset);
-    const zoom = (targetDistance - extraDistance) * ease;
-    extraDistance += zoom;
-    sightline.subVectors(camera.position, controls.target);
-    const distance = THREE.MathUtils.clamp(sightline.length() + zoom, controls.minDistance, controls.maxDistance);
-    camera.position.copy(controls.target).add(sightline.setLength(distance));
     controls.update();
-    const elapsed = reduced ? 1600 : now - started;
     const fading = Math.max(0, 1 - elapsed / 720);
     if (fadingPaths.length && fading === 0) {
       fadingPaths.forEach(dispose);
