@@ -173,7 +173,7 @@ const defaultConsequences = [
   'Another group tries to reproduce the results under different conditions.',
 ];
 
-const expansionPrompt = /\b(?:second|third|another|additional|new) (?:physical |retail |coffee )?(?:location|storefront|shop|store|restaurant|caf[eé]|bakery)(?![\p{L}\p{N}_])/u;
+const expansionPrompt = /\b(?:second|another|additional) (?:(?:physical |retail )?location|(?:[\p{L}-]+ ){0,2}(?:storefront|shop|store|restaurant|caf[eé]|bakery))(?![\p{L}\p{N}_])/u;
 
 export interface Branch {
   index: number;
