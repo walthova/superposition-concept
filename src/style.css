@@ -217,10 +217,11 @@ footer a { color: var(--lavender); }
   .narrative { font-size: 13px; }
 }
 @media (max-width: 435px) {
-  .masthead { height: 54px; gap: 8px; }
+  .masthead { min-height: 54px; height: auto; gap: 8px; }
   .wordmark { gap: 6px; font-size: 11px; }
   .version { display: none; }
   .masthead a { display: flex; align-items: center; min-height: 44px; font-size: 12px; }
+  .masthead-nav a span { display: none; }
   h1 { font-size: clamp(32px, 9.1vw, 39px); }
   .viewport-top, .observe-panel { padding-inline: 12px; }
   .viewport-top { display: block; }
