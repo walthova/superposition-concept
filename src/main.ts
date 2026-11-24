@@ -13,6 +13,7 @@ const observe = element<HTMLButtonElement>('observe');
 const observeAction = element('observe-action');
 const branchList = element('branches');
 const detail = element('branch-detail');
+const branchAnnouncement = element('branch-announcement');
 const observationLabel = element('observation-label');
 const observationDetail = element('observation-detail');
 const observationStory = element('observation-story');
@@ -68,6 +69,7 @@ function selectBranch(index: number) {
       <div><dt>SHIFT</dt><dd>${signed((branch.probability - branch.incoherent) * 100, 1)} pp</dd></div>
     </dl>`;
   detail.querySelector('.narrative')!.textContent = branch.narrative;
+  branchAnnouncement.textContent = `${branch.title}. ${branch.narrative}`;
 }
 
 function renderCircuit({ circuit, factors }: Scenario) {
