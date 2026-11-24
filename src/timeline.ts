@@ -1,5 +1,7 @@
 import { Box3, CubicBezierCurve3, MathUtils, Vector3 } from 'three';
 
+const trailCapacity = 6;
+
 export function timelineCurve(fork: Vector3, index: number): CubicBezierCurve3 {
   const offset = (index - 3.5) / 3.5;
   const end = new Vector3(
@@ -17,6 +19,11 @@ export function observePath<T extends { index: number; curve: CubicBezierCurve3 
   const path = frontier.find(candidate => candidate.index === index);
   if (!path) return;
   return { path, fork: path.curve.v3, fading: frontier.filter(candidate => candidate !== path) };
+}
+
+export function retainObservedPath<T>(trail: T[], path: T, dispose: (path: T) => void) {
+  trail.push(path);
+  trail.splice(0, Math.max(0, trail.length - trailCapacity)).forEach(dispose);
 }
 
 export function frameTimeline(curves: CubicBezierCurve3[]) {

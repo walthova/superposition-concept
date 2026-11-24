@@ -1,6 +1,6 @@
 import { PerspectiveCamera, Vector3 } from 'three';
 import { expect, it } from 'vitest';
-import { frameTimeline, minimumOrbitDistance, observePath, timelineCurve } from './timeline';
+import { frameTimeline, minimumOrbitDistance, observePath, retainObservedPath, timelineCurve } from './timeline';
 
 it('extends the same observed segments at successive horizons', () => {
   const root = new Vector3(0, -0.95, 3);
@@ -36,4 +36,12 @@ it('fits a distant fork at minimum zoom, including from the opposite side and on
       }
     }
   }
+});
+
+it('retains only the six newest observed paths and disposes each dropped segment once', () => {
+  const trail: number[] = [];
+  const dropped: number[] = [];
+  for (let i = 0; i < 10; i++) retainObservedPath(trail, i, path => dropped.push(path));
+  expect(trail).toEqual([4, 5, 6, 7, 8, 9]);
+  expect(dropped).toEqual([0, 1, 2, 3]);
 });

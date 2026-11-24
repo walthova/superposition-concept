@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Branch } from './scenario';
-import { frameTimeline, minimumOrbitDistance, observePath, timelineCurve } from './timeline';
+import { frameTimeline, minimumOrbitDistance, observePath, retainObservedPath, timelineCurve } from './timeline';
 
 export const colors = ['#8c9bff', '#a388ff', '#c28bff', '#ed9df1', '#fbadcc', '#ffbfaf', '#7ae9e6', '#7cbaff'];
 
@@ -133,7 +133,7 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
         opacity(previous, 0.79);
         previous.glow.position.copy(previous.curve.v3);
       }
-      trail.push(result.path);
+      retainObservedPath(trail, result.path, dispose);
       fadingPaths = result.fading;
     } else {
       paths.forEach(dispose);
