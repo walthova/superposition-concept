@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open the URL Vite prints, including `/superposition-concept/`. Enter a what-if or choose an example. Drag to orbit the map, Shift-scroll or pinch to zoom, and select a timeline node or inspector row to see its story and amplitude. On touch screens, swipe sideways to orbit or vertically to scroll the page. **Observe a future** samples a branch from the full distribution, regardless of which timeline you’re inspecting. The sampled outcome becomes the fork for eight new futures.
+Open the URL Vite prints, including `/superposition-concept/`. Enter a what-if or choose an example. Drag to orbit the map, Shift-scroll or pinch to zoom, and select a timeline node or inspector row to see its story and amplitude. On touch screens, swipe sideways to orbit or vertically to scroll the page. **Measure** samples an outcome from the full distribution, regardless of which timeline you’re inspecting. **Next circuit** uses that outcome as the fork for eight new futures.
 
 ## What’s quantum
 
