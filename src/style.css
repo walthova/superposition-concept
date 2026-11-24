@@ -105,9 +105,10 @@ textarea:focus-visible { outline: none; }
 #phase { color: #ddd8ef; margin-top: 6px; font-size: 15px; font-weight: 600; }
 .live { color: #a6e2d8; font: 10px var(--mono); border: 1px solid #2b5158; background: #132027; border-radius: 30px; padding: 6px 8px; align-self: flex-start; white-space: nowrap; }
 .live > span { background: #75e4cc; box-shadow: 0 0 8px #75e4cc; width: 5px; height: 5px; margin-right: 3px; }
-.viewport-hint { position: absolute; left: 22px; bottom: 100px; font: 11px var(--mono); color: #b3accd; pointer-events: none; }
+.viewport-hint { margin-top: 8px; font: 11px var(--mono); color: #b3accd; }
 .observation-copy { min-width: 0; }
 #observation-detail { margin-top: 4px; font-size: 13px; color: #f0eafa; }
+#observation-story { max-width: 56ch; margin-top: 5px; color: #d1c8e6; font-size: 12px; line-height: 1.4; }
 #observe {
   display: flex;
   align-items: center;
@@ -191,6 +192,5 @@ footer span { color: var(--lavender); margin-inline: 5px; }
   .version { display: none; }
   .masthead a { font-size: 11px; }
   .viewport-top, .viewport-bottom { padding-inline: 12px; }
-  .viewport-hint { left: 12px; }
   #observe { min-width: auto; gap: 6px; }
 }

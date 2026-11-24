@@ -14,6 +14,7 @@ const branchList = element('branches');
 const detail = element('branch-detail');
 const observationLabel = element('observation-label');
 const observationDetail = element('observation-detail');
+const observationStory = element('observation-story');
 function formatProbability(probability: number) {
   const percent = probability * 100;
   return percent > 0 && percent < 0.05 ? '<0.1%' : `${percent.toFixed(1)}%`;
@@ -100,7 +101,8 @@ function generate(input: string) {
   prompt.value = scenario.prompt;
   observationLabel.textContent = 'AWAITING OBSERVATION';
   observationDetail.textContent = 'All eight futures are possible.';
-  observationDetail.removeAttribute('title');
+  observationStory.hidden = true;
+  observationStory.textContent = '';
   renderScenario();
 }
 
@@ -123,7 +125,8 @@ observe.addEventListener('click', () => {
   const next = generateScenario(scenario.prompt, [...scenario.lineage, sampled.index]);
   observationLabel.textContent = `OBSERVED / |${sampled.bits}⟩ · ${formatProbability(sampled.probability)} WEIGHT`;
   observationDetail.textContent = `${sampled.title} → eight new futures`;
-  observationDetail.title = sampled.narrative;
+  observationStory.textContent = sampled.narrative;
+  observationStory.hidden = false;
   observe.disabled = true;
   scenario = next;
   renderScenario(sampled);
