@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0b14">
+    <meta name="description" content="A quantum thought experiment. Write a what-if, explore eight futures, and observe one.">
+    <title>Superposition — The Possibility Space</title>
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="wordmark"><span class="brand" aria-hidden="true">◈</span> SUPERPOSITION <span class="version">V.01</span></div>
+      <a href="#about">About the quantum model <span aria-hidden="true">↘</span></a>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="intro-title">
+        <div class="intro-copy">
+          <p class="eyebrow"><span></span> QUANTUM WORLD SIMULATOR</p>
+          <h1 id="intro-title">The possibility <em>space.</em></h1>
+          <p>One present. Many futures. Ask a what-if, explore the timelines, then observe one to see where it leads.</p>
+        </div>
+        <form id="prompt-form">
+          <label for="prompt">01 <span>ENTER A WHAT-IF</span></label>
+          <div class="prompt-row">
+            <textarea id="prompt" rows="2" maxlength="300" required></textarea>
+            <button class="generate" type="submit" aria-label="Generate timelines">↗</button>
+          </div>
+          <div id="examples" aria-label="Example prompts"></div>
+        </form>
+      </section>
+      <section class="workspace" aria-label="Simulation workspace">
+        <div class="viewport">
+          <div id="space" aria-hidden="true"></div>
+          <div class="viewport-top">
+            <div>
+              <p class="eyebrow">02 <span> / </span> POSSIBILITY MAP</p>
+              <p id="phase"></p>
+              <p id="viewport-hint" class="viewport-hint">Drag to orbit · Scroll to zoom</p>
+            </div>
+            <span class="live"><span></span> STATEVECTOR LIVE</span>
+          </div>
+          <div class="viewport-bottom">
+            <div class="observation-copy" role="status" aria-atomic="true">
+              <p id="observation-label" class="eyebrow">AWAITING OBSERVATION</p>
+              <p id="observation-detail">All eight futures are possible.</p>
+              <p id="observation-story" hidden></p>
+            </div>
+            <button id="observe" type="button"><span aria-hidden="true">◉</span> Observe <span aria-hidden="true">↗</span></button>
+          </div>
+        </div>
+        <aside class="inspector" aria-label="Quantum state inspector">
+          <div class="inspector-head">
+            <p class="eyebrow">03 <span> / </span> STATE INSPECTOR</p>
+            <span class="qubit-tag">3 QUBITS</span>
+          </div>
+          <h2>Quantum state</h2>
+          <p id="setting" class="muted"></p>
+          <div id="circuit" class="circuit"></div>
+          <div class="timeline-head"><span>SELECT A TIMELINE</span><span>WEIGHT</span></div>
+          <div id="branches" aria-label="Timelines"></div>
+          <div id="branch-detail" class="branch-detail" aria-live="polite"></div>
+        </aside>
+      </section>
+      <section id="about" class="about">
+        <p class="eyebrow">THE EXPERIMENT <span> / </span> 01</p>
+        <h2>What’s quantum here?</h2>
+        <p>No quantum hardware is connected. Your browser simulates three qubits: gates change signed amplitudes, which can reinforce or cancel each other. Each timeline’s weight is its squared amplitude. The no-interference comparison ignores phase between gates. Observe samples from those weights; the next round uses the result to seed a new circuit.</p>
+        <p>The stories and circuit inputs are generated from local templates, not real-world data. Weights describe this toy model, not the likelihood of actual events. A future backend could run the same circuits on IBM Quantum through Qiskit; that would not make the stories forecasts.</p>
+      </section>
+    </main>
+    <footer>SUPERPOSITION <span> / </span> AN EXPLORATION OF POSSIBLE FUTURES</footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
