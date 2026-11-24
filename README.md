@@ -4,7 +4,7 @@
 
 ## Try it
 
-Use Node.js 22 (22.12 or newer).
+[Open the demo in Devin](https://superposition--izrp0vdx.preview.devinapps.com) (Devin sign-in required), or run it locally with Node.js 22 (22.12 or newer).
 
 ```sh
 npm ci

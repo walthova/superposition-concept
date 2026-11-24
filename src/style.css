@@ -47,7 +47,8 @@ h1, h2, p { margin: 0; }
   font: 10px var(--mono);
   white-space: nowrap;
 }
-.masthead a { color: var(--muted); font-size: 13px; text-decoration: none; }
+.masthead-nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px clamp(8px, 2vw, 22px); }
+.masthead a { color: var(--muted); font-size: 13px; text-decoration: none; white-space: nowrap; }
 .masthead a:hover { color: #fff; }
 .masthead a span { color: var(--lavender); margin-left: 4px; }
 main, footer { width: min(90%, 1410px); margin-inline: auto; }
@@ -195,6 +196,7 @@ textarea:focus-visible { outline: none; }
 .about > p:not(.eyebrow) { margin-bottom: 10px; color: var(--muted); font-size: 14px; line-height: 1.7; }
 footer { border-top: 1px solid var(--line); padding: 18px 0 25px; color: var(--muted); font: 10px var(--mono); letter-spacing: .15em; }
 footer span { color: var(--lavender); margin-inline: 5px; }
+footer a { color: var(--lavender); }
 @media (max-width: 1000px) {
   .intro { gap: 20px; }
   .workspace { grid-template-columns: minmax(0, 1fr) 306px; }
@@ -215,10 +217,11 @@ footer span { color: var(--lavender); margin-inline: 5px; }
   .narrative { font-size: 13px; }
 }
 @media (max-width: 435px) {
-  .masthead { height: 54px; gap: 8px; }
+  .masthead { min-height: 54px; height: auto; gap: 8px; }
   .wordmark { gap: 6px; font-size: 11px; }
   .version { display: none; }
   .masthead a { display: flex; align-items: center; min-height: 44px; font-size: 12px; }
+  .masthead-nav a span { display: none; }
   h1 { font-size: clamp(32px, 9.1vw, 39px); }
   .viewport-top, .observe-panel { padding-inline: 12px; }
   .viewport-top { display: block; }
