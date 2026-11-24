@@ -2,9 +2,9 @@ import { statevector, type Circuit, type QuantumBackend } from './quantum';
 
 export const defaultPrompt = 'What if my city made public transit free by 2035?';
 export const examples = [
-  { label: 'A city without fares', prompt: defaultPrompt },
-  { label: 'A launch in orbit', prompt: 'What if a crew launched the first permanent lunar research base?' },
-  { label: 'A different workweek', prompt: 'What if our company shifted to a four-day workweek?' },
+  { label: 'Free transit', prompt: defaultPrompt },
+  { label: 'Lunar base', prompt: 'What if a crew launched the first permanent lunar research base?' },
+  { label: 'Four-day week', prompt: 'What if our company shifted to a four-day workweek?' },
 ];
 
 interface Factor {
