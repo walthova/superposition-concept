@@ -3,6 +3,7 @@ import { statevector, type Circuit, type QuantumBackend } from './quantum';
 export const defaultPrompt = 'What if my city made public transit free by 2035?';
 export const examples = [
   { label: 'Free transit', prompt: defaultPrompt },
+  { label: 'Second bakery', prompt: 'What if I took out a loan to open a second location for my bakery?' },
   { label: 'Lunar base', prompt: 'What if a crew launched the first permanent lunar research base?' },
   { label: 'Four-day week', prompt: 'What if our company shifted to a four-day workweek?' },
 ];
@@ -18,6 +19,8 @@ interface Setting {
   name: string;
   factors: [Factor, Factor, Factor];
   continuations: [Events, Events, Events];
+  titles?: [string, string, string, string, string, string, string, string];
+  consequences?: [string, string, string, string];
 }
 
 const settings = {
@@ -96,6 +99,41 @@ const settings = {
       ],
     ],
   },
+  expansion: {
+    name: 'Business expansion',
+    titles: [
+      'A Cash Squeeze', 'Busy but Stretched', 'Ready but Quiet', 'Busy Without a Buffer',
+      'A Slow, Funded Start', 'A Capacity Crunch', 'Room to Build', 'A Sustainable Start',
+    ],
+    consequences: [
+      '',
+      'You review both locations before committing to another lease.',
+      'You revisit which hours each location can afford to stay open.',
+      'You compare operating costs across both locations before replacing equipment.',
+    ],
+    factors: [
+      { label: 'Customer demand', outcomes: ['Sales at the new location start slowly, and some buyers are regulars switching from the original shop.', 'The new location attracts new customers without drawing sales away from the original shop.'] },
+      { label: 'Staffing coverage', outcomes: ['Splitting staff between locations leaves rush hours short-handed.', 'A new shift lead keeps both locations covered without pulling you away from the original shop.'] },
+      { label: 'Cash flow', outcomes: ['Upfront costs and overlapping bills drain the cash reserve before the new location breaks even.', 'The new location covers its recurring costs while the original shop retains a cash buffer.'] },
+    ],
+    continuations: [
+      [
+        ['Opening-week traffic fades and weekday sales stay low.', 'Repeat visits make weekday sales steadier.'],
+        ['Last-minute absences force shorter opening hours.', 'Cross-training lets staff cover absences at either location.'],
+        ['Payroll and rent come due before enough sales come in.', 'The new location starts contributing cash after payroll and rent.'],
+      ],
+      [
+        ['A nearby competitor draws customers away from the new location.', 'Local partnerships bring a steady stream of orders to the new location.'],
+        ['The original shop loses service capacity when its experienced staff cover the new one.', 'Promoting a second shift lead frees up time to run both locations.'],
+        ['Supplier bills eat into the money set aside for operating costs.', 'Better supplier terms leave cash available for unexpected bills.'],
+      ],
+      [
+        ['Customers keep choosing the original shop because the new location is less convenient.', 'The new location builds a customer base of its own.'],
+        ['Hiring delays leave both locations relying on overtime.', 'Predictable schedules reduce overtime across both locations.'],
+        ['An equipment replacement forces you to postpone other spending.', 'Cash reserves cover an equipment replacement without disrupting payroll.'],
+      ],
+    ],
+  },
   general: {
     name: 'Open scenario',
     factors: [
@@ -123,17 +161,19 @@ const settings = {
   },
 } satisfies Record<string, Setting>;
 
-const titles = [
+const defaultTitles = [
   'The Slow Drift', 'The Early Spark', 'The Quiet Pivot', 'The Breakaway',
   'The Patient Build', 'The Uneven Wave', 'The Long Arc', 'The New Equilibrium',
 ];
 
-const consequences = [
+const defaultConsequences = [
   '',
   'An independent review tests whether the changes can hold up under stress.',
   'The people most affected organize a public process to challenge the next decision.',
   'Another group tries to reproduce the results under different conditions.',
 ];
+
+const expansionPrompt = /\b(?:second|third|another|additional|new) (?:physical |retail |coffee )?(?:location|storefront|shop|store|restaurant|caf[eé]|bakery)(?![\p{L}\p{N}_])/u;
 
 export interface Branch {
   index: number;
@@ -168,7 +208,8 @@ export function generateScenario(
 ): Scenario {
   const prompt = input.trim().replace(/\s+/g, ' ') || defaultPrompt;
   const normalized = prompt.toLowerCase();
-  const setting = /\b(city|cities|transit|fare|transport|urban|housing)\b/.test(normalized) ? settings.city :
+  const setting: Setting = expansionPrompt.test(normalized) ? settings.expansion :
+    /\b(city|cities|transit|fare|transport|urban|housing)\b/.test(normalized) ? settings.city :
     /\b(orbit|lunar|moon|mars|space|expedition|planet)\b/.test(normalized) ? settings.space :
     /\b(company|office|workweek|team|work|business|organization)\b/.test(normalized) ? settings.work :
     settings.general;
@@ -196,7 +237,9 @@ export function generateScenario(
   const outcomes = setting.factors.map((factor, i) =>
     depth === 0 ? factor.outcomes : setting.continuations[Math.floor(beat / variants ** i) % variants][i],
   );
+  const consequences = setting.consequences ?? defaultConsequences;
   const consequence = consequences[Math.floor(step / combinations) % consequences.length];
+  const titles = setting.titles ?? defaultTitles;
   const branches = amplitudes.map((amplitude, index) => ({
     index,
     bits: index.toString(2).padStart(circuit.qubits, '0'),
