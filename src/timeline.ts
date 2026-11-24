@@ -21,6 +21,10 @@ export function observePath<T extends { index: number; curve: CubicBezierCurve3 
   return { path, fork: path.curve.v3, fading: frontier.filter(candidate => candidate !== path) };
 }
 
+export function collapseTimeline(frontier: { index: number; group: { visible: boolean } }[], index: number) {
+  frontier.forEach(path => { path.group.visible = path.index === index; });
+}
+
 export function retainObservedPath<T>(trail: T[], path: T, dispose: (path: T) => void) {
   trail.push(path);
   trail.splice(0, Math.max(0, trail.length - trailCapacity)).forEach(dispose);
