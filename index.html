@@ -32,11 +32,11 @@
         <div class="viewport">
           <div class="observe-panel">
             <div class="observation-copy" role="status" aria-atomic="true">
-              <p id="observation-label" class="eyebrow">READY TO OBSERVE</p>
-              <p id="observation-detail">Sample any of the eight futures by weight, then see what follows.</p>
+              <p id="observation-label" class="eyebrow">READY TO MEASURE</p>
+              <p id="observation-detail">Inspect any timeline. Measure samples from all eight basis states.</p>
               <p id="observation-story" hidden></p>
             </div>
-            <button id="observe" type="button" aria-describedby="observation-detail"><span aria-hidden="true">◉</span> Observe a future</button>
+            <button id="observe" type="button" aria-describedby="observation-detail"><span aria-hidden="true">◉</span> <span id="observe-action">Measure</span></button>
           </div>
           <div class="possibility-map">
             <div id="space" aria-hidden="true"></div>
@@ -62,7 +62,7 @@
           <h2>Quantum state</h2>
           <p id="setting" class="muted"></p>
           <div id="circuit" class="circuit"></div>
-          <div class="timeline-head"><span>INSPECT A TIMELINE</span><span>MODEL WEIGHT</span></div>
+          <div class="timeline-head"><span>INSPECT A TIMELINE</span><span>PRE-MEASUREMENT P</span></div>
           <div id="branches" aria-label="Timelines"></div>
           <div id="branch-detail" class="branch-detail" aria-live="polite"></div>
         </aside>
@@ -70,8 +70,9 @@
       <section id="about" class="about">
         <p class="eyebrow">THE EXPERIMENT <span> / </span> 01</p>
         <h2>What’s quantum here?</h2>
-        <p>No quantum hardware is connected. Your browser simulates three qubits: gates change signed amplitudes, which can reinforce or cancel each other. Each timeline’s weight is its squared amplitude. The no-interference comparison ignores phase between gates. Observe samples from those weights; the next round uses the result to seed a new circuit.</p>
-        <p>The stories and circuit inputs are generated from local templates, not real-world data. Weights describe this toy model, not the likelihood of actual events. A future backend could run the same circuits on IBM Quantum through Qiskit; that would not make the stories forecasts.</p>
+        <p>No quantum hardware is connected. Three simulated qubits start in |000⟩. The RY rotations create superpositions, the CNOT gates can entangle the qubits, and the final Hadamard mixes signed amplitudes so they can reinforce or cancel. The diagram uses bit order |q2 q1 q0⟩ for the outcome labels. The 3D map illustrates story branches, not the geometry of the quantum state.</p>
+        <p>Measurement samples one computational-basis outcome with probability |amplitude|². The inspector keeps the probabilities from before measurement so you can compare them with the same circuit dephased in the computational basis after each gate. The shift is the difference in percentage points. Next circuit starts from |000⟩ again with rotation angles seeded by the previous outcomes.</p>
+        <p>The stories and circuit inputs come from local templates, not real-world data. The probabilities describe circuit outcomes, not the likelihood of actual events.</p>
       </section>
     </main>
     <footer>SUPERPOSITION <span> / </span> AN EXPLORATION OF POSSIBLE FUTURES</footer>

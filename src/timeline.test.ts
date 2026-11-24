@@ -1,6 +1,6 @@
 import { PerspectiveCamera, Vector3 } from 'three';
 import { expect, it } from 'vitest';
-import { frameTimeline, minimumOrbitDistance, observePath, retainObservedPath, timelineCurve } from './timeline';
+import { collapseTimeline, frameTimeline, minimumOrbitDistance, observePath, retainObservedPath, timelineCurve } from './timeline';
 
 it('extends the same observed segments at successive horizons', () => {
   const root = new Vector3(0, -0.95, 3);
@@ -16,6 +16,18 @@ it('extends the same observed segments at successive horizons', () => {
   expect(second.path.curve.v0).toBe(first.path.curve.v3);
   expect(open(second.fork).every(path => path.curve.v0 === second.path.curve.v3)).toBe(true);
   expect(second.fork.z).toBeLessThan(first.fork.z);
+});
+
+it('shows only the measured path without removing the current frontier', () => {
+  const root = new Vector3();
+  const frontier = Array.from({ length: 8 }, (_, index) => ({
+    index, curve: timelineCurve(root, index), group: { visible: true },
+  }));
+  collapseTimeline(frontier, 4);
+  expect(frontier.filter(path => path.group.visible)).toEqual([frontier[4]]);
+  const next = observePath(frontier, 4)!;
+  expect(next.fork).toBe(frontier[4].curve.v3);
+  expect(next.fading).toHaveLength(7);
 });
 
 it('fits a distant fork at minimum zoom, including from the opposite side and on narrow screens', () => {

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Branch } from './scenario';
-import { frameTimeline, minimumOrbitDistance, observePath, retainObservedPath, timelineCurve } from './timeline';
+import { collapseTimeline, frameTimeline, minimumOrbitDistance, observePath, retainObservedPath, timelineCurve } from './timeline';
 
 export const colors = ['#8c9bff', '#a388ff', '#c28bff', '#ed9df1', '#fbadcc', '#ffbfaf', '#7ae9e6', '#7cbaff'];
 
@@ -117,9 +117,9 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
 
   const root = core.position.clone();
   let paths: Path[] = [];
-  let fadingPaths: Path[] = [];
   const trail: Path[] = [];
   let selected = 0;
+  let collapsed = false;
   let started = 0;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const frameStart = home.clone();
@@ -131,7 +131,6 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
   }
 
   function setBranches(branches: Branch[], observation?: number) {
-    fadingPaths.forEach(dispose);
     const result = observation === undefined ? undefined : observePath(paths, observation);
     if (result) {
       const previous = trail.at(-1);
@@ -140,12 +139,12 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
         previous.glow.position.copy(previous.curve.v3);
       }
       retainObservedPath(trail, result.path, dispose);
-      fadingPaths = result.fading;
+      result.fading.forEach(dispose);
     } else {
       paths.forEach(dispose);
-      fadingPaths = [];
       trail.splice(0).forEach(dispose);
     }
+    collapsed = false;
     started = performance.now();
     paths = branches.map(({ index, probability }) => {
       const path = makePath(timelineCurve(result?.fork ?? root, index), index, probability);
@@ -177,9 +176,10 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     if (start.distanceTo(new THREE.Vector2(event.clientX, event.clientY)) > 5) return;
     const rect = renderer.domElement.getBoundingClientRect();
     raycaster.setFromCamera(new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, 1 - (event.clientY - rect.top) / rect.height * 2), camera);
-    const targets = paths.map(path => path.group.children[2]);
+    const visiblePaths = paths.filter(path => path.group.visible);
+    const targets = visiblePaths.map(path => path.group.children[2]);
     const picked = raycaster.intersectObjects(targets, false)[0];
-    if (picked) onPick(paths[targets.indexOf(picked.object)].index);
+    if (picked) onPick(visiblePaths[targets.indexOf(picked.object)].index);
   });
 
   const offset = new THREE.Vector3();
@@ -191,11 +191,6 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     camera.position.add(offset);
     controls.update();
     const fading = Math.max(0, 1 - elapsed / 720);
-    if (fadingPaths.length && fading === 0) {
-      fadingPaths.forEach(dispose);
-      fadingPaths = [];
-    }
-    fadingPaths.forEach(path => opacity(path, fading * fading * 0.55));
     const latest = trail.at(-1);
     if (latest) {
       opacity(latest, 1.05 + fading * 0.45);
@@ -203,11 +198,19 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     }
     const reveal = Math.max(0, Math.min(1, (elapsed - (latest ? 500 : 0)) / 620));
     paths.forEach(path => {
-      opacity(path, reveal * (path.index === selected ? 1.1 : 0.62));
+      if (!path.group.visible) return;
+      opacity(path, collapsed ? 1.1 : reveal * (path.index === selected ? 1.1 : 0.62));
       path.glow.position.copy(path.curve.getPoint(reduced ? 0.6 : (now / 3400 + path.index * 0.12) % 1));
     });
     core.material.opacity = reduced ? 0.88 : 0.85 + Math.sin(now / 550) * 0.12;
     renderer.render(scene, camera);
   });
-  return { setBranches, select: (index: number) => { selected = index; } };
+  return {
+    setBranches,
+    select: (index: number) => { selected = index; },
+    collapseTo: (index: number) => {
+      collapsed = true;
+      collapseTimeline(paths, index);
+    },
+  };
 }
