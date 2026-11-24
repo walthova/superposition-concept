@@ -174,10 +174,10 @@ const defaultConsequences = [
 ];
 
 function isSecondSiteOpening(prompt: string): boolean {
-  const openings = prompt.matchAll(/\b(?:open(?:s|ed|ing)?|add(?:s|ed|ing)?) (?:a |an |my |our |its |their |the )?(second|another|additional|new) (?:[\p{L}-]+ ){0,2}(?:location|storefront|shop|store|restaurant|caf[eé]|bakery)(?![\p{L}\p{N}_])/gu);
+  const openings = prompt.matchAll(/\b(?:open(?:s|ed|ing)?(?: up)?|add(?:s|ed|ing)?) (?:a |an |my |our |its |their |the )?(second|another|additional|new) (?:(?:retail |physical )?location|(?:[\p{L}-]+ ){0,2}(?:storefront|shop|store|restaurant|caf[eé]|bakery))(?![\p{L}\p{N}_])/gu);
   for (const opening of openings) {
     if (opening[1] !== 'new' ||
-      /^ (?:alongside|in addition to) (?:my |our |its |their |the )?(?:existing|current|original|first)\b/.test(prompt.slice(opening.index + opening[0].length))) return true;
+      /^ (?:alongside|in addition to) (?:my |our |its |their |the )?(?:existing|current|original|first) (?:one|location|storefront|shop|store|restaurant|caf[eé]|bakery)(?![\p{L}\p{N}_])/u.test(prompt.slice(opening.index + opening[0].length))) return true;
   }
   return false;
 }

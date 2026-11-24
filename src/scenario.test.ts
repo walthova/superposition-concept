@@ -22,6 +22,7 @@ describe('scenario generation', () => {
 
   it.each([
     [bakeryLoan, 'Business expansion'],
+    ['What if I open up a second bakery?', 'Business expansion'],
     ['What if I opened another café in a neighboring city?', 'Business expansion'],
     ['What if my business opened a second pizza shop?', 'Business expansion'],
     ['What if my bakery opened a new store alongside its existing one?', 'Business expansion'],
@@ -29,8 +30,10 @@ describe('scenario generation', () => {
     ['What if I move my office to a new location?', 'Organizational systems'],
     ['What if another team handled store inventory?', 'Organizational systems'],
     ['What if I opened a new bakery?', 'Open scenario'],
+    ['What if I open a new bakery in addition to my current job?', 'Open scenario'],
     ['What if my business opened a third location?', 'Organizational systems'],
     ['What if my city adds a new shopping district?', 'Civic systems'],
+    ['What if my city adds a second polling location?', 'Civic systems'],
   ])('matches %s to %s', (prompt, setting) => {
     expect(generateScenario(prompt).setting).toBe(setting);
   });
