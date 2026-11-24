@@ -13,10 +13,12 @@ const observe = element<HTMLButtonElement>('observe');
 const observeAction = element('observe-action');
 const branchList = element('branches');
 const detail = element('branch-detail');
+const branchAnnouncement = element('branch-announcement');
 const observationLabel = element('observation-label');
 const observationDetail = element('observation-detail');
 const observationStory = element('observation-story');
 const mapSelection = element('map-selection');
+const stackedWorkspace = matchMedia('(max-width: 730px)');
 function formatProbability(probability: number) {
   const percent = probability * 100;
   return percent > 0 && percent < 0.05 ? '<0.1%' : `${percent.toFixed(1)}%`;
@@ -35,12 +37,27 @@ try {
   element('viewport-hint').textContent = '3D unavailable · Explore timelines in the inspector';
 }
 
+function placeBranchDetail(selected: HTMLButtonElement) {
+  if (stackedWorkspace.matches) {
+    selected.after(detail);
+  } else {
+    branchList.after(detail);
+  }
+}
+
+stackedWorkspace.addEventListener('change', () => {
+  const selected = branchList.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
+  if (selected) placeBranchDetail(selected);
+});
+
 function selectBranch(index: number) {
   const branch = scenario.branches[index];
   space?.select(index);
   mapSelection.textContent = sampled ? `Measured: ${sampled.title}` : `Inspecting: ${branch.title}`;
   for (const button of branchList.querySelectorAll('button')) {
-    button.setAttribute('aria-pressed', String(Number(button.dataset.index) === index));
+    const selected = Number(button.dataset.index) === index;
+    button.setAttribute('aria-pressed', String(selected));
+    if (selected) placeBranchDetail(button);
   }
   detail.style.setProperty('--branch-color', colors[index]);
   detail.innerHTML = `
@@ -52,6 +69,7 @@ function selectBranch(index: number) {
       <div><dt>SHIFT</dt><dd>${signed((branch.probability - branch.incoherent) * 100, 1)} pp</dd></div>
     </dl>`;
   detail.querySelector('.narrative')!.textContent = branch.narrative;
+  branchAnnouncement.textContent = `${branch.title}. ${branch.narrative}`;
 }
 
 function renderCircuit({ circuit, factors }: Scenario) {

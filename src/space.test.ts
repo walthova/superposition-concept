@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { reserveOrbitWheel } from './space';
+import { mapPixelRatio, reserveOrbitWheel } from './space';
 
 it.each([
   [{}, false],
@@ -12,4 +12,13 @@ it.each([
   canvas.addEventListener('wheel', event => reserveOrbitWheel(event as WheelEvent));
   canvas.addEventListener('wheel', event => event.preventDefault());
   expect(canvas.dispatchEvent(wheel)).toBe(!zooms);
+});
+
+it.each([
+  [1, true, 1],
+  [2, true, 1.5],
+  [3, true, 1.5],
+  [3, false, 2],
+])('caps a device pixel ratio of %d (coarse pointer: %s) at %d', (ratio, coarsePointer, expected) => {
+  expect(mapPixelRatio(ratio, coarsePointer)).toBe(expected);
 });

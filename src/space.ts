@@ -17,9 +17,13 @@ export function reserveOrbitWheel(event: WheelEvent) {
   if (!event.shiftKey || event.ctrlKey || event.metaKey) event.stopImmediatePropagation();
 }
 
+export function mapPixelRatio(devicePixelRatio: number, coarsePointer: boolean) {
+  return Math.min(devicePixelRatio, coarsePointer ? 1.5 : 2);
+}
+
 export function createSpace(host: HTMLElement, onPick: (index: number) => void) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(mapPixelRatio(window.devicePixelRatio, matchMedia('(pointer: coarse)').matches));
   host.append(renderer.domElement);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
