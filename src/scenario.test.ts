@@ -24,8 +24,11 @@ describe('scenario generation', () => {
     [bakeryLoan, 'Business expansion'],
     ['What if I opened another café in a neighboring city?', 'Business expansion'],
     ['What if my business opened a second pizza shop?', 'Business expansion'],
+    ['What if my bakery opened a new store alongside its existing one?', 'Business expansion'],
     ['What if our company moved to a four-day workweek?', 'Organizational systems'],
     ['What if I move my office to a new location?', 'Organizational systems'],
+    ['What if another team handled store inventory?', 'Organizational systems'],
+    ['What if I opened a new bakery?', 'Open scenario'],
     ['What if my business opened a third location?', 'Organizational systems'],
     ['What if my city adds a new shopping district?', 'Civic systems'],
   ])('matches %s to %s', (prompt, setting) => {

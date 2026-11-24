@@ -173,7 +173,14 @@ const defaultConsequences = [
   'Another group tries to reproduce the results under different conditions.',
 ];
 
-const expansionPrompt = /\b(?:second|another|additional) (?:(?:physical |retail )?location|(?:[\p{L}-]+ ){0,2}(?:storefront|shop|store|restaurant|caf[eé]|bakery))(?![\p{L}\p{N}_])/u;
+function isSecondSiteOpening(prompt: string): boolean {
+  const openings = prompt.matchAll(/\b(?:open(?:s|ed|ing)?|add(?:s|ed|ing)?) (?:a |an |my |our |its |their |the )?(second|another|additional|new) (?:[\p{L}-]+ ){0,2}(?:location|storefront|shop|store|restaurant|caf[eé]|bakery)(?![\p{L}\p{N}_])/gu);
+  for (const opening of openings) {
+    if (opening[1] !== 'new' ||
+      /^ (?:alongside|in addition to) (?:my |our |its |their |the )?(?:existing|current|original|first)\b/.test(prompt.slice(opening.index + opening[0].length))) return true;
+  }
+  return false;
+}
 
 export interface Branch {
   index: number;
@@ -208,7 +215,7 @@ export function generateScenario(
 ): Scenario {
   const prompt = input.trim().replace(/\s+/g, ' ') || defaultPrompt;
   const normalized = prompt.toLowerCase();
-  const setting: Setting = expansionPrompt.test(normalized) ? settings.expansion :
+  const setting: Setting = isSecondSiteOpening(normalized) ? settings.expansion :
     /\b(city|cities|transit|fare|transport|urban|housing)\b/.test(normalized) ? settings.city :
     /\b(orbit|lunar|moon|mars|space|expedition|planet)\b/.test(normalized) ? settings.space :
     /\b(company|office|workweek|team|work|business|organization)\b/.test(normalized) ? settings.work :
