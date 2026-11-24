@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Branch } from './scenario';
+import { observePath, timelineCurve } from './timeline';
 
 export const colors = ['#8c9bff', '#a388ff', '#c28bff', '#ed9df1', '#fbadcc', '#ffbfaf', '#7ae9e6', '#7cbaff'];
 
@@ -20,11 +21,12 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
   camera.position.set(0, 7.2, 19);
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 1.9, 0);
+  const home = new THREE.Vector3(0, 1.9, 0);
+  controls.target.copy(home);
   controls.enableDamping = true;
   controls.enablePan = false;
   controls.minDistance = 8;
-  controls.maxDistance = 32;
+  controls.maxDistance = 68;
   controls.maxPolarAngle = Math.PI * 0.59;
   controls.update();
 
@@ -107,47 +109,42 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     path.materials.forEach((material, i) => { material.opacity = levels[i] * weight; });
   }
 
-  const spread = (index: number) => (index - 3.5) / 3.5;
   const root = core.position.clone();
   let paths: Path[] = [];
-  let oldPaths: Path[] = [];
-  let stem: Path | undefined;
-  let fromStem: Path | undefined;
+  let fadingPaths: Path[] = [];
+  const trail: Path[] = [];
   let selected = 0;
-  let observed: number | undefined;
   let started = 0;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const framing = home.clone();
+  const targetFrame = home.clone();
+  let extraDistance = 0;
+  let targetDistance = 0;
 
   function setBranches(branches: Branch[], observation?: number) {
-    oldPaths.forEach(dispose);
-    if (fromStem) dispose(fromStem);
-    fromStem = stem;
-    stem = undefined;
-    oldPaths = observation === undefined ? [] : paths;
-    if (observation === undefined) {
+    fadingPaths.forEach(dispose);
+    const result = observation === undefined ? undefined : observePath(paths, observation);
+    if (result) {
+      const previous = trail.at(-1);
+      if (previous) {
+        opacity(previous, 0.79);
+        previous.glow.position.copy(previous.curve.v3);
+      }
+      trail.push(result.path);
+      fadingPaths = result.fading;
+      targetFrame.set(result.fork.x * 0.4, home.y, result.fork.z + Math.min(12, (root.z - result.fork.z) * 0.42));
+      targetDistance = Math.min(28, (root.z - result.fork.z) * 0.46);
+    } else {
       paths.forEach(dispose);
-      if (fromStem) dispose(fromStem);
-      fromStem = undefined;
+      fadingPaths = [];
+      trail.splice(0).forEach(dispose);
+      targetFrame.copy(home);
+      targetDistance = 0;
     }
-    observed = observation;
     started = performance.now();
-    const fork = root.clone();
-    if (observation !== undefined) {
-      const offset = spread(observation);
-      fork.set(offset * 2.9, 0.48, 0.6);
-      stem = makePath(new THREE.CubicBezierCurve3(
-        root, new THREE.Vector3(0, -0.7, 1.7), new THREE.Vector3(offset * 2.1, -0.25, 1), fork,
-      ), observation, 0.5);
-      network.add(stem.group);
-    }
     paths = branches.map(({ index, probability }) => {
-      const offset = spread(index);
-      const end = new THREE.Vector3(offset * 6.95 + fork.x * 0.32, 2.18 + (index % 2) * 1.58 + (1 - Math.abs(offset)) * 1.15, -2.9 - Math.abs(offset) * 1.45);
-      const curve = new THREE.CubicBezierCurve3(
-        fork, new THREE.Vector3(fork.x + offset * 0.6, fork.y + 0.3, fork.z - 0.8),
-        new THREE.Vector3(end.x * 0.75 + fork.x * 0.25, end.y + 0.06, end.z + 1.7), end,
-      );
-      const path = makePath(curve, index, probability);
+      const path = makePath(timelineCurve(result?.fork ?? root, index), index, probability);
+      opacity(path, 0);
       network.add(path.group);
       return path;
     });
@@ -176,20 +173,33 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     if (picked) onPick(paths[targets.indexOf(picked.object)].index);
   });
 
+  const offset = new THREE.Vector3();
+  const sightline = new THREE.Vector3();
   renderer.setAnimationLoop(now => {
+    const ease = reduced ? 1 : 0.055;
+    offset.subVectors(targetFrame, framing).multiplyScalar(ease);
+    framing.add(offset);
+    controls.target.add(offset);
+    camera.position.add(offset);
+    const zoom = (targetDistance - extraDistance) * ease;
+    extraDistance += zoom;
+    sightline.subVectors(camera.position, controls.target);
+    const distance = THREE.MathUtils.clamp(sightline.length() + zoom, controls.minDistance, controls.maxDistance);
+    camera.position.copy(controls.target).add(sightline.setLength(distance));
     controls.update();
     const elapsed = reduced ? 1600 : now - started;
     const fading = Math.max(0, 1 - elapsed / 720);
-    if (oldPaths.length && fading === 0) {
-      oldPaths.forEach(dispose);
-      oldPaths = [];
-      if (fromStem) dispose(fromStem);
-      fromStem = undefined;
+    if (fadingPaths.length && fading === 0) {
+      fadingPaths.forEach(dispose);
+      fadingPaths = [];
     }
-    oldPaths.forEach(path => opacity(path, path.index === observed ? Math.min(1.5, fading * 2.2) : fading * fading * 0.55));
-    if (fromStem) opacity(fromStem, fading);
-    if (stem) opacity(stem, Math.max(0, Math.min(1, (elapsed - 240) / 400)));
-    const reveal = Math.max(0, Math.min(1, (elapsed - (stem ? 500 : 0)) / 620));
+    fadingPaths.forEach(path => opacity(path, fading * fading * 0.55));
+    const latest = trail.at(-1);
+    if (latest) {
+      opacity(latest, 1.05 + fading * 0.45);
+      latest.glow.position.copy(latest.curve.getPoint(Math.min(1, elapsed / 550)));
+    }
+    const reveal = Math.max(0, Math.min(1, (elapsed - (latest ? 500 : 0)) / 620));
     paths.forEach(path => {
       opacity(path, reveal * (path.index === selected ? 1.1 : 0.62));
       path.glow.position.copy(path.curve.getPoint(reduced ? 0.6 : (now / 3400 + path.index * 0.12) % 1));
