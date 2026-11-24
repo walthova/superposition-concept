@@ -173,11 +173,18 @@ const defaultConsequences = [
   'Another group tries to reproduce the results under different conditions.',
 ];
 
+const siteEnd = String.raw`(?![\p{L}\p{N}_])`;
+const businessSite = String.raw`(?:(?:business |physical |retail )?location|(?:(?!(?:at|in|of|to) )[\p{L}-]+ ){0,2}(?:storefront|shop|store|restaurant|caf[eé]|bakery))${siteEnd}`;
+const openingSite = new RegExp(
+  String.raw`\b(?:open(?:s|ed|ing)?(?: up)?|add(?:s|ed|ing)?) (?:a |an |my |our |its |their |the )?(second|another|additional|new) ${businessSite}`, 'gu',
+);
+const keepingSite = new RegExp(
+  String.raw`^ (?:alongside|in addition to) (?:my |our |its |their |the )?(?:existing|current|original|first) (?:one${siteEnd}|${businessSite})`, 'u',
+);
+
 function isSecondSiteOpening(prompt: string): boolean {
-  const openings = prompt.matchAll(/\b(?:open(?:s|ed|ing)?(?: up)?|add(?:s|ed|ing)?) (?:a |an |my |our |its |their |the )?(second|another|additional|new) (?:(?:retail |physical )?location|(?:[\p{L}-]+ ){0,2}(?:storefront|shop|store|restaurant|caf[eé]|bakery))(?![\p{L}\p{N}_])/gu);
-  for (const opening of openings) {
-    if (opening[1] !== 'new' ||
-      /^ (?:alongside|in addition to) (?:my |our |its |their |the )?(?:existing|current|original|first) (?:one|location|storefront|shop|store|restaurant|caf[eé]|bakery)(?![\p{L}\p{N}_])/u.test(prompt.slice(opening.index + opening[0].length))) return true;
+  for (const opening of prompt.matchAll(openingSite)) {
+    if (opening[1] !== 'new' || keepingSite.test(prompt.slice(opening.index + opening[0].length))) return true;
   }
   return false;
 }
