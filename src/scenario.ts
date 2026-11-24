@@ -12,10 +12,12 @@ interface Factor {
   outcomes: [string, string];
 }
 
+type Events = [Factor['outcomes'], Factor['outcomes'], Factor['outcomes']];
+
 interface Setting {
   name: string;
   factors: [Factor, Factor, Factor];
-  continuations: [Factor['outcomes'], Factor['outcomes'], Factor['outcomes']];
+  continuations: [Events, Events, Events];
 }
 
 const settings = {
@@ -27,9 +29,21 @@ const settings = {
       { label: 'Political support', outcomes: ['Uneven gains spark a backlash over funding.', 'A broad coalition commits to a second phase.'] },
     ],
     continuations: [
-      ['Riders make fewer discretionary trips.', 'Daily routines re-form around transit.'],
-      ['Maintenance backlogs limit new routes.', 'A redesigned network reaches underserved neighborhoods.'],
-      ['The city scales back the program at its next budget vote.', 'Neighboring districts agree to share the costs.'],
+      [
+        ['Riders make fewer discretionary trips.', 'Daily routines re-form around transit.'],
+        ['Maintenance backlogs limit new routes.', 'A redesigned network reaches underserved neighborhoods.'],
+        ['The city scales back the program at its next budget vote.', 'Neighboring districts agree to share the costs.'],
+      ],
+      [
+        ['Displaced riders buy cars to regain reliable access.', 'More households choose to live without a second car.'],
+        ['Crowding pushes wait times past the service target.', 'Dedicated lanes make bus journeys more reliable.'],
+        ['A legal challenge delays the next funding package.', 'A regional ballot measure funds service improvements.'],
+      ],
+      [
+        ['Employers return to subsidizing parking.', 'Employers stagger shifts around the most frequent routes.'],
+        ['An aging fleet forces operators to shorten service hours.', 'A new depot supports overnight service.'],
+        ['The council moves expansion funds to road repairs.', 'A regional board adopts a permanent funding formula.'],
+      ],
     ],
   },
   space: {
@@ -40,9 +54,21 @@ const settings = {
       { label: 'Program support', outcomes: ['Sponsors insist on a pause to review the risks.', 'Partners commit resources for a second expedition.'] },
     ],
     continuations: [
-      ['The crew suspends fieldwork to keep the habitat running.', 'The crew sets up a remote science station.'],
-      ['A missed delivery delays the next rotation.', 'Local production reduces reliance on shipments.'],
-      ['Funders redirect the program to shorter missions.', 'A joint mission brings a second crew and new equipment.'],
+      [
+        ['The crew suspends fieldwork to keep the habitat running.', 'The crew sets up a remote science station.'],
+        ['A missed delivery delays the next rotation.', 'Local production reduces reliance on shipments.'],
+        ['Funders redirect the program to shorter missions.', 'A joint mission brings a second crew and new equipment.'],
+      ],
+      [
+        ['The crew shifts to remote experiments after equipment failures.', 'The crew charts a route to an unexplored ridge.'],
+        ['Replacement parts sit on the ground awaiting transport.', 'A common docking standard opens a second supply route.'],
+        ['Mission control cancels a planned habitat wing.', 'A university consortium funds a shared laboratory.'],
+      ],
+      [
+        ['The crew packs up an aging outpost.', 'A new crew takes over the long-running field studies.'],
+        ['Power shortages ground the surface vehicles.', 'A new storage system keeps the base running through outages.'],
+        ['Partners consolidate the program into a single site.', 'The partners sign a long-term agreement to maintain several sites.'],
+      ],
     ],
   },
   work: {
@@ -53,9 +79,21 @@ const settings = {
       { label: 'Sponsor support', outcomes: ['Leaders roll back the rollout to a small pilot.', 'Leaders fund a wider rollout based on early results.'] },
     ],
     continuations: [
-      ['Some teams return to their previous schedule.', 'Teams agree on a shared schedule that protects focus time.'],
-      ['Customer handoffs get slower as coverage gaps appear.', 'Cross-training helps teams cover the gaps.'],
-      ['Leaders keep the experiment limited to one department.', 'Leaders make the new routines the company-wide default.'],
+      [
+        ['Some teams return to their previous schedule.', 'Teams agree on a shared schedule that protects focus time.'],
+        ['Customer handoffs get slower as coverage gaps appear.', 'Cross-training helps teams cover the gaps.'],
+        ['Leaders keep the experiment limited to one department.', 'Leaders make the new routines the company-wide default.'],
+      ],
+      [
+        ['New hires struggle to learn the split schedule.', 'Teams write a common handbook for newcomers.'],
+        ['Urgent requests pile up between shifts.', 'A rotating duty team takes urgent requests without interrupting everyone.'],
+        ['Managers restore old performance targets.', 'Leaders tie evaluations to delivered outcomes rather than hours.'],
+      ],
+      [
+        ['Experienced staff move to teams with predictable hours.', 'Experienced staff mentor teams trying the new routine.'],
+        ['Busy periods lead to unplanned overtime.', 'Forecasting helps teams schedule extra coverage before busy periods.'],
+        ['Leadership replaces the program with smaller trials.', 'Leadership makes the flexible schedule part of new contracts.'],
+      ],
     ],
   },
   general: {
@@ -66,9 +104,21 @@ const settings = {
       { label: 'External support', outcomes: ['Outside pressures force a reset.', 'Allies make the next phase easier to sustain.'] },
     ],
     continuations: [
-      ['Participants return to familiar routines.', 'The first participants bring in a second wave.'],
-      ['The group narrows its effort to what it can sustain.', 'The group builds enough capacity to try a larger version.'],
-      ['Supporters ask how the changes can be reversed.', 'A new partner takes responsibility for the next phase.'],
+      [
+        ['Participants return to familiar routines.', 'The first participants bring in a second wave.'],
+        ['The group narrows its effort to what it can sustain.', 'The group builds enough capacity to try a larger version.'],
+        ['Supporters ask how the changes can be reversed.', 'A new partner takes responsibility for the next phase.'],
+      ],
+      [
+        ['Disagreements drive some participants to leave.', 'Participants form a group to resolve disputes.'],
+        ['The organizers put a new project on hold.', 'The organizers finish a project that frees up shared resources.'],
+        ['A partner withdraws from a planned commitment.', 'Several partners pool their resources instead of acting alone.'],
+      ],
+      [
+        ['Newcomers opt out after the first setbacks.', 'Newcomers adapt the approach to a different setting.'],
+        ['The work comes to depend on a few overextended people.', 'The group distributes responsibilities so more people can contribute.'],
+        ['Supporters fund only the smallest version.', 'Supporters establish a shared fund to carry the work forward.'],
+      ],
     ],
   },
 } satisfies Record<string, Setting>;
@@ -131,7 +181,17 @@ export function generateScenario(
   };
   const { amplitudes, probabilities, incoherent } = backend.run(circuit);
   const prior = lineage.at(-1);
-  const outcomes = prior === undefined ? setting.factors.map(factor => factor.outcomes) : setting.continuations;
+  const depth = lineage.length;
+  const eventSeed = hash(`${normalized}:${lineage[0]}`);
+  const events = (depth + eventSeed - 1) % setting.continuations.length;
+  const groups = 3 * depth + eventSeed % 5;
+  const laterEvents: Events = [
+    [`${groups} participating groups vote to leave.`, `${groups} new groups join after running their own trials.`],
+    [`Organizers close ${groups + 2} sites to consolidate resources.`, `A new round of investment opens ${groups + 2} more sites.`],
+    [`${groups + 1} backers decline to renew their commitments.`, `${groups + 1} backers sign agreements to take on operating costs.`],
+  ];
+  const outcomes = depth === 0 ? setting.factors.map(factor => factor.outcomes) :
+    depth <= setting.continuations.length ? setting.continuations[events] : laterEvents;
   const branches = amplitudes.map((amplitude, index) => ({
     index,
     bits: index.toString(2).padStart(circuit.qubits, '0'),
@@ -141,5 +201,5 @@ export function generateScenario(
     probability: probabilities[index],
     incoherent: incoherent[index],
   }));
-  return { prompt, setting: setting.name, depth: lineage.length, lineage: [...lineage], factors: setting.factors, circuit, branches };
+  return { prompt, setting: setting.name, depth, lineage: [...lineage], factors: setting.factors, circuit, branches };
 }

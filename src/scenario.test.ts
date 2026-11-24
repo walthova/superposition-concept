@@ -28,4 +28,14 @@ describe('scenario generation', () => {
     expect(next.branches.map(branch => branch.probability)).not.toEqual(root.branches.map(branch => branch.probability));
     expect(next.branches).not.toEqual(generateScenario(root.prompt, [0]).branches);
   });
+
+  it('introduces new events even when consecutive observations sample the same state', () => {
+    for (const prompt of [defaultPrompt, 'A lunar base', 'A four-day workweek', 'A new project']) {
+      const horizons = Array.from({ length: 10 }, (_, i) => generateScenario(prompt, Array<number>(i + 1).fill(7)));
+      for (let index = 0; index < 8; index++) {
+        const events = horizons.map(horizon => horizon.branches[index].narrative.split(': ')[1]);
+        expect(new Set(events).size).toBe(horizons.length);
+      }
+    }
+  });
 });
