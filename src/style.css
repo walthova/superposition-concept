@@ -37,7 +37,7 @@ h1, h2, p { margin: 0; }
   justify-content: space-between;
   gap: 20px;
 }
-.wordmark { display: flex; align-items: center; gap: 11px; font: 700 13px var(--mono); letter-spacing: .17em; }
+.wordmark { display: flex; align-items: center; gap: 11px; font: 700 13px var(--mono); letter-spacing: .17em; text-decoration: none; }
 .brand { color: #c3afff; font-size: 24px; text-shadow: 0 0 16px #ab89ff; }
 .version, .qubit-tag {
   border: 1px solid #413555;
@@ -48,9 +48,9 @@ h1, h2, p { margin: 0; }
   white-space: nowrap;
 }
 .masthead-nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px clamp(8px, 2vw, 22px); }
-.masthead a { color: var(--muted); font-size: 13px; text-decoration: none; white-space: nowrap; }
-.masthead a:hover { color: #fff; }
-.masthead a span { color: var(--lavender); margin-left: 4px; }
+.masthead-nav a { color: var(--muted); font-size: 13px; text-decoration: none; white-space: nowrap; }
+.masthead-nav a:hover { color: #fff; }
+.masthead-nav a span { color: var(--lavender); margin-left: 4px; }
 main, footer { width: min(90%, 1410px); margin-inline: auto; }
 .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, .75fr); gap: 45px; align-items: end; padding: 38px 0 28px; }
 .eyebrow { color: var(--lavender); font: 600 11px/1.4 var(--mono); letter-spacing: .125em; }
@@ -220,7 +220,8 @@ footer a { color: var(--lavender); }
   .masthead { min-height: 54px; height: auto; gap: 8px; }
   .wordmark { gap: 6px; font-size: 11px; }
   .version { display: none; }
-  .masthead a { display: flex; align-items: center; min-height: 44px; font-size: 12px; }
+  .masthead a { min-height: 44px; }
+  .masthead-nav a { display: flex; align-items: center; font-size: 12px; }
   .masthead-nav a span { display: none; }
   h1 { font-size: clamp(32px, 9.1vw, 39px); }
   .viewport-top, .observe-panel { padding-inline: 12px; }

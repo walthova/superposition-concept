@@ -4,7 +4,7 @@
 
 ## Try it
 
-[Open the demo in Devin](https://superposition--izrp0vdx.preview.devinapps.com) (Devin sign-in required), or run it locally with Node.js 22 (22.12 or newer).
+[Open the public demo](https://walthova.github.io/superposition-concept/), or run it locally with Node.js 22 (22.12 or newer).
 
 ```sh
 npm ci
@@ -29,6 +29,6 @@ npm run build
 npm run preview
 ```
 
-CI runs lint, type checking, unit tests, and build. The Pages workflow publishes `dist/` on pushes to `main` or manual dispatch once the repository owner has selected **Settings → Pages → Source → GitHub Actions**.
+CI runs lint, type checking, unit tests, and build. The Pages workflow publishes `dist/` on pushes to `main` or manual dispatch. After first selecting **Settings → Pages → Source → GitHub Actions**, run **Deploy to GitHub Pages** from the Actions tab to publish the current `main`.
 
 The original Python Monte Carlo spike and concept notebook are preserved in [legacy](legacy/); they are not used by the web app.
