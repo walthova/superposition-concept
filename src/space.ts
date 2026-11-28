@@ -9,6 +9,8 @@ interface Path {
   group: THREE.Group;
   curve: THREE.CubicBezierCurve3;
   index: number;
+  halo: THREE.Mesh;
+  endpoint: THREE.Sprite;
   glow: THREE.Sprite;
   materials: (THREE.LineBasicMaterial | THREE.SpriteMaterial | THREE.MeshBasicMaterial)[];
 }
@@ -103,7 +105,7 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     group.add(endpoint);
     const glow = sprite(color, 0.72);
     group.add(glow);
-    return { group, curve, index, glow, materials: [line.material, halo.material, endpoint.material, glow.material] };
+    return { group, curve, index, halo, endpoint, glow, materials: [line.material, halo.material, endpoint.material, glow.material] };
   }
 
   function dispose(path: Path) {
@@ -209,8 +211,28 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     core.material.opacity = reduced ? 0.88 : 0.85 + Math.sin(now / 550) * 0.12;
     renderer.render(scene, camera);
   });
+  function updateWeights(branches: Branch[]) {
+    for (const path of paths) {
+      const branch = branches[path.index];
+      if (!branch) continue;
+      path.halo.geometry.dispose();
+      path.halo.geometry = new THREE.TubeGeometry(path.curve, 46, 0.038 + Math.sqrt(branch.probability) * 0.065, 5, false);
+      path.endpoint.scale.setScalar(0.9 + Math.sqrt(branch.probability));
+    }
+  }
+
+  function uncollapse(branches: Branch[]) {
+    collapsed = false;
+    for (const path of paths) {
+      path.group.visible = true;
+    }
+    updateWeights(branches);
+  }
+
   return {
     setBranches,
+    updateWeights,
+    uncollapse,
     select: (index: number) => { selected = index; },
     collapseTo: (index: number) => {
       collapsed = true;

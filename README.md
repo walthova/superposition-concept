@@ -15,9 +15,9 @@ Open the URL Vite prints, including `/superposition-concept/`. Enter a what-if o
 
 ## What’s quantum
 
-- Browser-local templates classify a prompt and seed `RY` angles for three binary factors. The simulated circuit starts in `|000⟩`, mixes and links the factors with `RY`, `CNOT`, and `H`, and reports signed real amplitudes. Labels display bits in `q2 q1 q0` order.
+- An optional AI backend (`worker/`) turns any what-if question into three specific binary factors and eight tailored stories (with browser-local templates as an instant fallback). Sliders on each factor set its `RY` rotation angle (`θ = 2·asin(√p)`). The simulated circuit starts in `|000⟩`, mixes and links the factors with `RY`, `CNOT`, and `H`, and reports signed real amplitudes. Labels display bits in `q2 q1 q0` order.
 - A timeline’s weight is its squared amplitude. The inspector compares it with a reference that discards phase after each gate: the difference shows how amplitudes can interfere. The browser uses classical randomness to sample a basis state, then seeds a new circuit with the observed lineage.
-- Neither the model weights nor the narratives are predictions. They do not come from real-world datasets, and no quantum hardware, API key, or backend is needed. The circuit and simulator are separate from the renderer; a later version could send the gate description to an IBM Quantum/Qiskit adapter and report measured shot frequencies separately from simulator amplitudes.
+- Neither the model weights nor the narratives are predictions. No quantum hardware is connected, and the AI API key lives only in the backend worker (never in the client). Set `VITE_API_URL` at build time (or as a GitHub Pages repository variable) to connect the static frontend to the deployed worker. The circuit and simulator are separate from the renderer; a later version could send the gate description to an IBM Quantum/Qiskit adapter and report measured shot frequencies separately from simulator amplitudes.
 
 ## Develop and deploy
 

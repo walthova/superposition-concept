@@ -30,6 +30,7 @@
             <button class="generate" type="submit">Run what-if</button>
           </div>
           <div id="examples" aria-label="Example prompts"></div>
+          <p id="prompt-status" class="prompt-status" role="status" aria-live="polite"></p>
         </form>
       </section>
       <section class="workspace" aria-label="Simulation workspace">
@@ -66,6 +67,10 @@
           <h2>Quantum state</h2>
           <p id="setting" class="muted"></p>
           <div id="circuit" class="circuit"></div>
+          <div class="factors-panel" aria-label="Factor likelihood sliders">
+            <div class="factors-head"><span>FACTOR LIKELIHOODS</span><span>SETS RY ANGLES</span></div>
+            <div id="factors" class="factors-list"></div>
+          </div>
           <div class="timeline-head"><span>INSPECT A TIMELINE</span><span>PRE-MEASUREMENT P</span></div>
           <div id="branches" aria-label="Timelines"></div>
           <div id="branch-detail" class="branch-detail"></div>
@@ -77,7 +82,7 @@
         <h2>What’s quantum here?</h2>
         <p>No quantum hardware is connected. Three simulated qubits start in |000⟩. The RY rotations create superpositions, the CNOT gates can entangle the qubits, and the final Hadamard mixes signed amplitudes so they can reinforce or cancel. The diagram uses bit order |q2 q1 q0⟩ for the outcome labels. The 3D map illustrates story branches, not the geometry of the quantum state.</p>
         <p>Measurement samples one computational-basis outcome with probability |amplitude|². The inspector keeps the probabilities from before measurement so you can compare them with the same circuit dephased in the computational basis after each gate. The shift is the difference in percentage points. Next circuit starts from |000⟩ again with rotation angles seeded by the previous outcomes.</p>
-        <p>The stories and circuit inputs come from local templates, not real-world data. The probabilities describe circuit outcomes, not the likelihood of actual events.</p>
+        <p>When AI generation is active, a language model suggests the three factors and eight timeline stories for your question (falling back to local templates if unavailable). The three-qubit circuit and all probabilities are still simulated locally in your browser: moving a factor slider adjusts its RY rotation angle, so the probabilities describe circuit outcomes rather than real-world forecasts.</p>
       </section>
     </main>
     <footer>SUPERPOSITION <span> / </span> A CONCEPT BY <a href="https://github.com/walthova">WALTER</a></footer>

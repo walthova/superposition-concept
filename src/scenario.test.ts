@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { defaultPrompt, examples, generateScenario } from './scenario';
+import {
+  advanceScenario,
+  angleFromLikelihood,
+  createAiScenario,
+  defaultPrompt,
+  examples,
+  generateScenario,
+  likelihoodFromAngle,
+  reweightScenario,
+  type AiScenarioData,
+} from './scenario';
 
 const bakeryLoan = 'What if I take out a 150,000 USD loan to open a second location for my bakery business next year?';
 
@@ -77,5 +87,50 @@ describe('scenario generation', () => {
         expect(new Set(events).size).toBe(horizons.length);
       }
     }
+  });
+
+  it('maps factor likelihoods to RY angles and reweights probabilities without changing stories', () => {
+    for (const p of [0.05, 0.25, 0.5, 0.75, 0.95]) {
+      expect(likelihoodFromAngle(angleFromLikelihood(p))).toBeCloseTo(p, 6);
+    }
+    const base = generateScenario(defaultPrompt);
+    const reweighted = reweightScenario(base, [0.9, 0.2, 0.8]);
+    expect(reweighted.branches.map(b => b.title)).toEqual(base.branches.map(b => b.title));
+    expect(reweighted.branches.map(b => b.narrative)).toEqual(base.branches.map(b => b.narrative));
+    expect(reweighted.branches.reduce((sum, b) => sum + b.probability, 0)).toBeCloseTo(1);
+    expect(reweighted.branches.map(b => b.probability)).not.toEqual(base.branches.map(b => b.probability));
+  });
+
+  it('builds and advances AI-authored scenarios with custom factors and eight stories', () => {
+    const aiData: AiScenarioData = {
+      setting: 'Coffee shop pivot',
+      factors: [
+        { label: 'Morning foot traffic', lowLabel: 'Slow mornings', highLabel: 'Packed rush', likelihood: 0.65 },
+        { label: 'Bean supply cost', lowLabel: 'Price spike', highLabel: 'Stable roast', likelihood: 0.4 },
+        { label: 'Barista retention', lowLabel: 'High turnover', highLabel: 'Steady crew', likelihood: 0.7 },
+      ],
+      branches: ['111', '000', '001', '010', '011', '100', '101', '110'].map(bits => ({
+        bits,
+        title: bits === '111' ? 'Phase 2: Peak Rush' : `Outcome ${bits}`,
+        narrative: bits === '000' ? 'After launch: regulars stay away.' : `Story for branch ${bits}.`,
+      })),
+    };
+    const scenario = createAiScenario('What if I convert my bookstore into a cafe?', aiData);
+    expect(scenario.source).toBe('ai');
+    expect(scenario.setting).toBe('Coffee shop pivot');
+    expect(scenario.factors.map(f => f.label)).toEqual(['Morning foot traffic', 'Bean supply cost', 'Barista retention']);
+    expect(scenario.branches.map(b => b.bits)).toEqual(['000', '001', '010', '011', '100', '101', '110', '111']);
+    expect(scenario.branches[0].title).toBe('Outcome 000');
+    expect(scenario.branches[7].title).toBe('Phase 2: Peak Rush');
+    expect(scenario.branches.reduce((sum, b) => sum + b.probability, 0)).toBeCloseTo(1);
+
+    const next = advanceScenario(scenario, 7);
+    expect(next.depth).toBe(1);
+    expect(next.lineage).toEqual([7]);
+    expect(next.branches[0].narrative).toBe('After Phase 2: Peak Rush: After launch: regulars stay away.');
+    expect(next.likelihoods[0]).toBeGreaterThan(scenario.likelihoods[0]);
+
+    const third = advanceScenario(next, 0);
+    expect(third.branches[0].narrative).toBe('After Outcome 000: After launch: regulars stay away.');
   });
 });
