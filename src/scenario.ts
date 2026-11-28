@@ -217,6 +217,7 @@ export interface Branch {
   bits: string;
   title: string;
   narrative: string;
+  baseNarrative?: string;
   amplitude: number;
   probability: number;
   incoherent: number;
@@ -354,11 +355,13 @@ export function createAiScenario(
   const branches = amplitudes.map((amplitude, index) => {
     const bits = index.toString(2).padStart(circuit.qubits, '0');
     const authored = byBits.get(bits) ?? data.branches[index];
+    const baseNarrative = authored?.narrative.trim() || '';
     return {
       index,
       bits,
       title: authored?.title.trim() || defaultTitles[index],
-      narrative: authored?.narrative.trim() || '',
+      narrative: baseNarrative,
+      baseNarrative,
       amplitude,
       probability: probabilities[index],
       incoherent: incoherent[index],
@@ -414,11 +417,13 @@ export function advanceScenario(
     ...reweighted,
     depth: lineage.length,
     lineage,
-    branches: reweighted.branches.map(branch => ({
-      ...branch,
-      narrative: prefix
-        ? `${prefix}${branch.narrative.replace(/^After [^:]+:\s*/, '')}`
-        : branch.narrative,
-    })),
+    branches: reweighted.branches.map(branch => {
+      const base = branch.baseNarrative ?? branch.narrative;
+      return {
+        ...branch,
+        baseNarrative: base,
+        narrative: prefix ? `${prefix}${base}` : base,
+      };
+    }),
   };
 }

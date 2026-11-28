@@ -111,8 +111,8 @@ describe('scenario generation', () => {
       ],
       branches: ['111', '000', '001', '010', '011', '100', '101', '110'].map(bits => ({
         bits,
-        title: `Outcome ${bits}`,
-        narrative: `Story for branch ${bits}.`,
+        title: bits === '111' ? 'Phase 2: Peak Rush' : `Outcome ${bits}`,
+        narrative: bits === '000' ? 'After launch: regulars stay away.' : `Story for branch ${bits}.`,
       })),
     };
     const scenario = createAiScenario('What if I convert my bookstore into a cafe?', aiData);
@@ -121,13 +121,16 @@ describe('scenario generation', () => {
     expect(scenario.factors.map(f => f.label)).toEqual(['Morning foot traffic', 'Bean supply cost', 'Barista retention']);
     expect(scenario.branches.map(b => b.bits)).toEqual(['000', '001', '010', '011', '100', '101', '110', '111']);
     expect(scenario.branches[0].title).toBe('Outcome 000');
-    expect(scenario.branches[7].title).toBe('Outcome 111');
+    expect(scenario.branches[7].title).toBe('Phase 2: Peak Rush');
     expect(scenario.branches.reduce((sum, b) => sum + b.probability, 0)).toBeCloseTo(1);
 
     const next = advanceScenario(scenario, 7);
     expect(next.depth).toBe(1);
     expect(next.lineage).toEqual([7]);
-    expect(next.branches[0].narrative).toBe('After Outcome 111: Story for branch 000.');
+    expect(next.branches[0].narrative).toBe('After Phase 2: Peak Rush: After launch: regulars stay away.');
     expect(next.likelihoods[0]).toBeGreaterThan(scenario.likelihoods[0]);
+
+    const third = advanceScenario(next, 0);
+    expect(third.branches[0].narrative).toBe('After Outcome 000: After launch: regulars stay away.');
   });
 });
