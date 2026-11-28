@@ -88,6 +88,11 @@ textarea:focus-visible { outline: none; }
 #examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 #examples button { padding: 4px 8px; color: var(--muted); font: 10px var(--mono); background: #141120; border: 1px solid #342b49; border-radius: 5px; }
 #examples button:hover { border-color: var(--lavender); color: #eee9fa; }
+.generate:disabled { opacity: .62; cursor: wait; }
+.prompt-status { min-height: 16px; margin-top: 7px; color: var(--muted); font: 11px var(--mono); letter-spacing: .02em; }
+.prompt-status[data-state="loading"] { color: #d5c7ff; }
+.prompt-status[data-state="ai"] { color: #9be2d5; }
+.prompt-status[data-state="fallback"] { color: #f1c69c; }
 .workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 347px); border: 1px solid #3d3455; border-radius: 13px; overflow: hidden; box-shadow: 0 22px 65px #0006; }
 .viewport {
   display: flex;
@@ -162,6 +167,19 @@ textarea:focus-visible { outline: none; }
 .gate.measure { color: #a5ddd3; border-color: #467373; background: #1b3034; }
 .factor-key { display: flex; flex-wrap: wrap; gap: 3px 8px; border-top: 1px solid #322941; margin-top: 4px; padding-top: 6px; color: #b1a8c5; font-size: 10px; }
 .factor-key b { font: 10px var(--mono); color: #d7b9ff; }
+.factors-panel { margin: 0 0 13px; border: 1px solid #342b49; border-radius: 7px; padding: 9px 10px; background: #151222; }
+.factors-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; color: var(--muted); font: 10px var(--mono); letter-spacing: .08em; }
+.factors-list { display: grid; gap: 9px; }
+.factor-control { display: grid; gap: 4px; }
+.factor-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 12px; }
+.factor-title { display: flex; align-items: baseline; gap: 6px; min-width: 0; color: #e8e2f8; }
+.factor-title b { flex: none; font: 10px var(--mono); color: #d7b9ff; }
+.factor-title span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.factor-value { flex: none; font: 11px var(--mono); color: #9be2d5; }
+.factor-slider { width: 100%; height: 18px; margin: 0; accent-color: #bdabff; cursor: pointer; }
+.factor-slider:focus-visible { outline: 2px solid #d0c5ff; outline-offset: 2px; border-radius: 4px; }
+.factor-poles { display: flex; justify-content: space-between; gap: 8px; color: #9e96b6; font-size: 10px; }
+.factor-poles span:last-child { text-align: right; }
 .timeline-head { padding: 0 7px 5px; color: var(--muted); font: 10px var(--mono); letter-spacing: .08em; }
 #branches { display: grid; gap: 3px; }
 .branch {

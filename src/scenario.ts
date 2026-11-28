@@ -8,10 +8,33 @@ export const examples = [
   { label: 'Four-day week', prompt: 'What if our company shifted to a four-day workweek?' },
 ];
 
-interface Factor {
+export interface Factor {
   label: string;
+  lowLabel: string;
+  highLabel: string;
   outcomes: [string, string];
 }
+
+export interface AiFactorInput {
+  label: string;
+  lowLabel: string;
+  highLabel: string;
+  likelihood: number;
+}
+
+export interface AiBranchInput {
+  bits: string;
+  title: string;
+  narrative: string;
+}
+
+export interface AiScenarioData {
+  setting: string;
+  factors: [AiFactorInput, AiFactorInput, AiFactorInput];
+  branches: AiBranchInput[];
+}
+
+export type ScenarioSource = 'ai' | 'local';
 
 type Events = [Factor['outcomes'], Factor['outcomes'], Factor['outcomes']];
 
@@ -27,9 +50,9 @@ const settings = {
   city: {
     name: 'Civic systems',
     factors: [
-      { label: 'Public adoption', outcomes: ['Residents change their habits slowly.', 'Residents embrace the change faster than expected.'] },
-      { label: 'System capacity', outcomes: ['Existing infrastructure strains under new demands.', 'Operators adapt service and capacity to meet demand.'] },
-      { label: 'Political support', outcomes: ['Uneven gains spark a backlash over funding.', 'A broad coalition commits to a second phase.'] },
+      { label: 'Public adoption', lowLabel: 'Slow shift', highLabel: 'Rapid uptake', outcomes: ['Residents change their habits slowly.', 'Residents embrace the change faster than expected.'] },
+      { label: 'System capacity', lowLabel: 'Strained fleet', highLabel: 'Adaptive service', outcomes: ['Existing infrastructure strains under new demands.', 'Operators adapt service and capacity to meet demand.'] },
+      { label: 'Political support', lowLabel: 'Funding backlash', highLabel: 'Broad coalition', outcomes: ['Uneven gains spark a backlash over funding.', 'A broad coalition commits to a second phase.'] },
     ],
     continuations: [
       [
@@ -52,9 +75,9 @@ const settings = {
   space: {
     name: 'Exploration systems',
     factors: [
-      { label: 'Crew momentum', outcomes: ['The crew narrows its mission to essential operations.', 'The crew completes its first objectives ahead of schedule.'] },
-      { label: 'Supply reliability', outcomes: ['Delays force engineers to ration critical supplies.', 'Reliable deliveries make experiments and expansion possible.'] },
-      { label: 'Program support', outcomes: ['Sponsors insist on a pause to review the risks.', 'Partners commit resources for a second expedition.'] },
+      { label: 'Crew momentum', lowLabel: 'Essential ops', highLabel: 'Ahead of plan', outcomes: ['The crew narrows its mission to essential operations.', 'The crew completes its first objectives ahead of schedule.'] },
+      { label: 'Supply reliability', lowLabel: 'Rationed cargo', highLabel: 'Steady resupply', outcomes: ['Delays force engineers to ration critical supplies.', 'Reliable deliveries make experiments and expansion possible.'] },
+      { label: 'Program support', lowLabel: 'Risk pause', highLabel: 'Second mission', outcomes: ['Sponsors insist on a pause to review the risks.', 'Partners commit resources for a second expedition.'] },
     ],
     continuations: [
       [
@@ -77,9 +100,9 @@ const settings = {
   work: {
     name: 'Organizational systems',
     factors: [
-      { label: 'Team adoption', outcomes: ['Teams keep the old habits that feel safest.', 'Teams redesign their routines around the change.'] },
-      { label: 'Operational capacity', outcomes: ['Coordination costs absorb the early gains.', 'New routines free up time for the work that matters most.'] },
-      { label: 'Sponsor support', outcomes: ['Leaders roll back the rollout to a small pilot.', 'Leaders fund a wider rollout based on early results.'] },
+      { label: 'Team adoption', lowLabel: 'Old habits', highLabel: 'New routines', outcomes: ['Teams keep the old habits that feel safest.', 'Teams redesign their routines around the change.'] },
+      { label: 'Operational capacity', lowLabel: 'Coordination drag', highLabel: 'Focused time', outcomes: ['Coordination costs absorb the early gains.', 'New routines free up time for the work that matters most.'] },
+      { label: 'Sponsor support', lowLabel: 'Small pilot', highLabel: 'Wider rollout', outcomes: ['Leaders roll back the rollout to a small pilot.', 'Leaders fund a wider rollout based on early results.'] },
     ],
     continuations: [
       [
@@ -112,9 +135,9 @@ const settings = {
       'You compare operating costs across both locations before replacing equipment.',
     ],
     factors: [
-      { label: 'Customer demand', outcomes: ['Sales at the new location start slowly, and some buyers are regulars switching from the original shop.', 'The new location attracts new customers without drawing sales away from the original shop.'] },
-      { label: 'Staffing coverage', outcomes: ['Splitting staff between locations leaves rush hours short-handed.', 'A new shift lead keeps both locations covered without pulling you away from the original shop.'] },
-      { label: 'Cash flow', outcomes: ['Upfront costs and overlapping bills drain the cash reserve before the new location breaks even.', 'The new location covers its recurring costs while the original shop retains a cash buffer.'] },
+      { label: 'Customer demand', lowLabel: 'Slow traffic', highLabel: 'New buyers', outcomes: ['Sales at the new location start slowly, and some buyers are regulars switching from the original shop.', 'The new location attracts new customers without drawing sales away from the original shop.'] },
+      { label: 'Staffing coverage', lowLabel: 'Short-handed', highLabel: 'Covered shifts', outcomes: ['Splitting staff between locations leaves rush hours short-handed.', 'A new shift lead keeps both locations covered without pulling you away from the original shop.'] },
+      { label: 'Cash flow', lowLabel: 'Reserve squeeze', highLabel: 'Cash buffer', outcomes: ['Upfront costs and overlapping bills drain the cash reserve before the new location breaks even.', 'The new location covers its recurring costs while the original shop retains a cash buffer.'] },
     ],
     continuations: [
       [
@@ -137,9 +160,9 @@ const settings = {
   general: {
     name: 'Open scenario',
     factors: [
-      { label: 'Adoption', outcomes: ['Most people wait for stronger evidence before committing.', 'Early adopters turn the change into a visible movement.'] },
-      { label: 'Capacity', outcomes: ['Limited resources keep the change local.', 'New resources allow the change to spread.'] },
-      { label: 'External support', outcomes: ['Outside pressures force a reset.', 'Allies make the next phase easier to sustain.'] },
+      { label: 'Adoption', lowLabel: 'Wait and see', highLabel: 'Early momentum', outcomes: ['Most people wait for stronger evidence before committing.', 'Early adopters turn the change into a visible movement.'] },
+      { label: 'Capacity', lowLabel: 'Tight limits', highLabel: 'Room to scale', outcomes: ['Limited resources keep the change local.', 'New resources allow the change to spread.'] },
+      { label: 'External support', lowLabel: 'Outside pushback', highLabel: 'Allied backing', outcomes: ['Outside pressures force a reset.', 'Allies make the next phase easier to sustain.'] },
     ],
     continuations: [
       [
@@ -202,11 +225,47 @@ export interface Branch {
 export interface Scenario {
   prompt: string;
   setting: string;
+  source: ScenarioSource;
   depth: number;
   lineage: number[];
-  factors: Factor[];
+  factors: [Factor, Factor, Factor];
+  likelihoods: [number, number, number];
   circuit: Circuit;
   branches: Branch[];
+}
+
+export function clampLikelihood(value: number): number {
+  if (!Number.isFinite(value)) return 0.5;
+  return Math.min(1, Math.max(0, value));
+}
+
+export function angleFromLikelihood(likelihood: number): number {
+  return 2 * Math.asin(Math.sqrt(clampLikelihood(likelihood)));
+}
+
+export function likelihoodFromAngle(angle: number): number {
+  const s = Math.sin(angle / 2);
+  return clampLikelihood(s * s);
+}
+
+export function buildCircuitFromAngles(angles: readonly [number, number, number]): Circuit {
+  return {
+    qubits: 3,
+    gates: [
+      ...angles.map((angle, target) => ({ kind: 'RY' as const, target, angle })),
+      { kind: 'CNOT', control: 0, target: 1 },
+      { kind: 'CNOT', control: 1, target: 2 },
+      { kind: 'H', target: 0 },
+    ],
+  };
+}
+
+export function buildCircuitFromLikelihoods(likelihoods: readonly [number, number, number]): Circuit {
+  return buildCircuitFromAngles([
+    angleFromLikelihood(likelihoods[0]),
+    angleFromLikelihood(likelihoods[1]),
+    angleFromLikelihood(likelihoods[2]),
+  ]);
 }
 
 function hash(text: string): number {
@@ -215,12 +274,16 @@ function hash(text: string): number {
   return value >>> 0;
 }
 
+export function normalizePrompt(input: string): string {
+  return input.trim().replace(/\s+/g, ' ') || defaultPrompt;
+}
+
 export function generateScenario(
   input: string,
   lineage: readonly number[] = [],
   backend: QuantumBackend = statevector,
 ): Scenario {
-  const prompt = input.trim().replace(/\s+/g, ' ') || defaultPrompt;
+  const prompt = normalizePrompt(input);
   const normalized = prompt.toLowerCase();
   const setting: Setting = isSecondSiteOpening(normalized) ? settings.expansion :
     /\b(city|cities|transit|fare|transport|urban|housing)\b/.test(normalized) ? settings.city :
@@ -231,16 +294,9 @@ export function generateScenario(
     const seeded = 0.78 + (hash(`${normalized}:${label}:${lineage.join('.')}`) % 85) / 100;
     const previous = lineage.at(-1);
     return previous === undefined ? seeded : seeded + (previous & (1 << i) ? 0.25 : -0.25);
-  });
-  const circuit: Circuit = {
-    qubits: 3,
-    gates: [
-      ...angles.map((angle, target) => ({ kind: 'RY' as const, target, angle })),
-      { kind: 'CNOT', control: 0, target: 1 },
-      { kind: 'CNOT', control: 1, target: 2 },
-      { kind: 'H', target: 0 },
-    ],
-  };
+  }) as [number, number, number];
+  const likelihoods = angles.map(likelihoodFromAngle) as [number, number, number];
+  const circuit = buildCircuitFromAngles(angles);
   const { amplitudes, probabilities, incoherent } = backend.run(circuit);
   const prior = lineage.at(-1);
   const depth = lineage.length;
@@ -263,5 +319,106 @@ export function generateScenario(
     probability: probabilities[index],
     incoherent: incoherent[index],
   }));
-  return { prompt, setting: setting.name, depth, lineage: [...lineage], factors: setting.factors, circuit, branches };
+  return {
+    prompt,
+    setting: setting.name,
+    source: 'local',
+    depth,
+    lineage: [...lineage],
+    factors: setting.factors,
+    likelihoods,
+    circuit,
+    branches,
+  };
+}
+
+export function createAiScenario(
+  input: string,
+  data: AiScenarioData,
+  lineage: readonly number[] = [],
+  backend: QuantumBackend = statevector,
+): Scenario {
+  const prompt = normalizePrompt(input);
+  const factors = data.factors.map(factor => ({
+    label: factor.label.trim(),
+    lowLabel: factor.lowLabel.trim(),
+    highLabel: factor.highLabel.trim(),
+    outcomes: [factor.lowLabel.trim(), factor.highLabel.trim()] as [string, string],
+  })) as [Factor, Factor, Factor];
+  const likelihoods = data.factors.map(factor =>
+    Math.min(0.95, Math.max(0.05, clampLikelihood(factor.likelihood))),
+  ) as [number, number, number];
+  const circuit = buildCircuitFromLikelihoods(likelihoods);
+  const { amplitudes, probabilities, incoherent } = backend.run(circuit);
+  const byBits = new Map(data.branches.map(branch => [branch.bits, branch]));
+  const branches = amplitudes.map((amplitude, index) => {
+    const bits = index.toString(2).padStart(circuit.qubits, '0');
+    const authored = byBits.get(bits) ?? data.branches[index];
+    return {
+      index,
+      bits,
+      title: authored?.title.trim() || defaultTitles[index],
+      narrative: authored?.narrative.trim() || '',
+      amplitude,
+      probability: probabilities[index],
+      incoherent: incoherent[index],
+    };
+  });
+  return {
+    prompt,
+    setting: data.setting.trim() || 'AI scenario',
+    source: 'ai',
+    depth: lineage.length,
+    lineage: [...lineage],
+    factors,
+    likelihoods,
+    circuit,
+    branches,
+  };
+}
+
+export function reweightScenario(
+  scenario: Scenario,
+  nextLikelihoods: readonly [number, number, number],
+  backend: QuantumBackend = statevector,
+): Scenario {
+  const likelihoods = nextLikelihoods.map(clampLikelihood) as [number, number, number];
+  const circuit = buildCircuitFromLikelihoods(likelihoods);
+  const { amplitudes, probabilities, incoherent } = backend.run(circuit);
+  const branches = scenario.branches.map((branch, index) => ({
+    ...branch,
+    amplitude: amplitudes[index],
+    probability: probabilities[index],
+    incoherent: incoherent[index],
+  }));
+  return { ...scenario, likelihoods, circuit, branches };
+}
+
+export function advanceScenario(
+  scenario: Scenario,
+  observedIndex: number,
+  backend: QuantumBackend = statevector,
+): Scenario {
+  const lineage = [...scenario.lineage, observedIndex];
+  if (scenario.source === 'local') {
+    return generateScenario(scenario.prompt, lineage, backend);
+  }
+  const previous = scenario.branches[observedIndex];
+  const nudged = scenario.likelihoods.map((value, i) => {
+    const delta = observedIndex & (1 << i) ? 0.12 : -0.12;
+    return Math.min(0.95, Math.max(0.05, clampLikelihood(value + delta)));
+  }) as [number, number, number];
+  const reweighted = reweightScenario(scenario, nudged, backend);
+  const prefix = previous ? `After ${previous.title}: ` : '';
+  return {
+    ...reweighted,
+    depth: lineage.length,
+    lineage,
+    branches: reweighted.branches.map(branch => ({
+      ...branch,
+      narrative: prefix
+        ? `${prefix}${branch.narrative.replace(/^After [^:]+:\s*/, '')}`
+        : branch.narrative,
+    })),
+  };
 }
