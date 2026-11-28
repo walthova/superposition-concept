@@ -9,14 +9,23 @@ function asNonEmptyString(value: unknown, maxLength: number): string | null {
   return trimmed.slice(0, maxLength);
 }
 
+function asFiniteNumber(value: unknown): number | null {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
 function asFactor(value: unknown): AiFactorInput | null {
   if (!value || typeof value !== 'object') return null;
   const record = value as Record<string, unknown>;
   const label = asNonEmptyString(record.label, 48);
   const lowLabel = asNonEmptyString(record.lowLabel, 40);
   const highLabel = asNonEmptyString(record.highLabel, 40);
-  const rawLikelihood = typeof record.likelihood === 'number' ? record.likelihood : Number(record.likelihood);
-  if (!label || !lowLabel || !highLabel || !Number.isFinite(rawLikelihood)) return null;
+  const rawLikelihood = asFiniteNumber(record.likelihood);
+  if (!label || !lowLabel || !highLabel || rawLikelihood === null) return null;
   const normalized = rawLikelihood > 1 && rawLikelihood <= 100 ? rawLikelihood / 100 : rawLikelihood;
   const likelihood = Math.min(0.95, Math.max(0.05, normalized));
   return { label, lowLabel, highLabel, likelihood };

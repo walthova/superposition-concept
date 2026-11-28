@@ -26,6 +26,14 @@ describe('AI scenario client', () => {
   it('rejects malformed or incomplete AI payloads', () => {
     expect(parseAiScenarioData(null)).toBeNull();
     expect(parseAiScenarioData({ ...validPayload, factors: validPayload.factors.slice(0, 2) })).toBeNull();
+    expect(parseAiScenarioData({
+      ...validPayload,
+      factors: [{ ...validPayload.factors[0], likelihood: null }, validPayload.factors[1], validPayload.factors[2]],
+    })).toBeNull();
+    expect(parseAiScenarioData({
+      ...validPayload,
+      factors: [{ ...validPayload.factors[0], likelihood: '' }, validPayload.factors[1], validPayload.factors[2]],
+    })).toBeNull();
     expect(parseAiScenarioData({ ...validPayload, branches: validPayload.branches.slice(0, 7) })).toBeNull();
     expect(parseAiScenarioData({
       ...validPayload,
