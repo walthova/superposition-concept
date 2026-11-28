@@ -21,6 +21,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 20;
+const MAX_BODY_BYTES = 2048;
 const rateBuckets = new Map<string, number[]>();
 
 const SYSTEM_PROMPT = `You are the scenario writer for Superposition, a 3-qubit interactive what-if explorer.
@@ -100,6 +101,35 @@ function extractJsonText(raw: string): unknown {
   const trimmed = raw.trim();
   const unfenced = trimmed.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   return JSON.parse(unfenced);
+}
+
+async function readBoundedText(request: Request, maxBytes: number): Promise<string | null> {
+  const contentLength = request.headers.get('Content-Length');
+  if (contentLength !== null) {
+    const declared = Number(contentLength);
+    if (Number.isFinite(declared) && declared > maxBytes) return null;
+  }
+  if (!request.body) return '';
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let totalBytes = 0;
+  let result = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel();
+        return null;
+      }
+      result += decoder.decode(value, { stream: true });
+    }
+    result += decoder.decode();
+    return result;
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 async function callOpenAi(prompt: string, apiKey: string, model: string, fetchImpl: typeof fetch): Promise<unknown> {
@@ -232,9 +262,14 @@ export async function handleRequest(
     return jsonResponse({ error: 'Too many requests. Please wait a minute and try again.' }, 429, headers);
   }
 
+  const rawBody = await readBoundedText(request, MAX_BODY_BYTES);
+  if (rawBody === null) {
+    return jsonResponse({ error: 'Request body too large' }, 413, headers);
+  }
+
   let body: unknown;
   try {
-    body = await request.json();
+    body = JSON.parse(rawBody);
   } catch {
     return jsonResponse({ error: 'Invalid JSON body' }, 400, headers);
   }
