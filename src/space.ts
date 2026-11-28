@@ -221,9 +221,18 @@ export function createSpace(host: HTMLElement, onPick: (index: number) => void) 
     }
   }
 
+  function uncollapse(branches: Branch[]) {
+    collapsed = false;
+    for (const path of paths) {
+      path.group.visible = true;
+    }
+    updateWeights(branches);
+  }
+
   return {
     setBranches,
     updateWeights,
+    uncollapse,
     select: (index: number) => { selected = index; },
     collapseTo: (index: number) => {
       collapsed = true;

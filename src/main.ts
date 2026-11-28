@@ -236,7 +236,7 @@ function applyReweight(nextLikelihoods: [number, number, number]) {
   updateBranchProbabilities();
   if (wasSampled) {
     resetMeasurement();
-    space?.setBranches(scenario.branches);
+    space?.uncollapse(scenario.branches);
   } else {
     space?.updateWeights(scenario.branches);
   }
